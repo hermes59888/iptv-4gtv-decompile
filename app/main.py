@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 import os
 import secrets
+import json
 
 app = FastAPI(title="IPTV-4GTV", version="1.0.0")
 
@@ -27,6 +28,10 @@ def render_template(filename: str) -> HTMLResponse:
 class AdminInitData(BaseModel):
     admin_user: str
     admin_pwd: str
+
+class LoginData(BaseModel):
+    username: str
+    password: str
 
 class UpdateTokenData(BaseModel):
     action: str
@@ -60,11 +65,22 @@ async def login_page():
     return render_template("admin_login.html")
 
 @app.post("/login")
-async def login(request: Request, admin_user: str = Form(), admin_pwd: str = Form()):
-    """處理登入"""
+async def login(request: Request):
+    """處理登入 - 支援 JSON 或 Form 格式"""
+    content_type = request.headers.get("content-type", "")
+    
+    if "application/json" in content_type:
+        body = await request.json()
+        admin_user = body.get("username", "")
+        admin_pwd = body.get("password", "")
+    else:
+        form = await request.form()
+        admin_user = form.get("admin_user", "") or form.get("username", "")
+        admin_pwd = form.get("admin_pwd", "") or form.get("password", "")
+    
     if admin_user == ADMIN_USER and admin_pwd == ADMIN_PWD:
-        return RedirectResponse(url="/config/proxy", status_code=303)
-    return HTMLResponse(render_template("admin_login.html").body + '<div class="alert alert-danger">帳號或密碼錯誤</div>')
+        return JSONResponse({"success": True, "redirect": "/config/proxy", "message": "登入成功"})
+    return JSONResponse({"success": False, "error": "帳號或密碼錯誤"})
 
 @app.get("/logout")
 async def logout():
