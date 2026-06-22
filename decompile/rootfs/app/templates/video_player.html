@@ -79,7 +79,7 @@
                 <div class="protocol-indicator" id="protocolIndicator">HTTPS</div>
                 <div class="countdown-indicator" id="countdownIndicator">下一集: <span id="countdownText">5</span>秒</div>
                 <video id="videoPlayer" playsinline></video>
-                <div class="loading-indicator" id="loadingIndicator" style="display: none;"><div class="spinner-border text-primary"></div><p class="mt-2">加载中...</p></div>
+                <div class="loading-indicator" id="loadingIndicator" style="display: none;"><div class="spinner-border text-primary"></div><p class="mt-2">載入中...</p></div>
                 <div class="controls">
                     <button class="btn-player" id="playPauseBtn"><i class="bi bi-play-fill" id="playIcon"></i></button>
                     <div class="volume-control"><button class="btn-player" id="muteBtn"><i class="bi bi-volume-up-fill" id="volumeIcon"></i></button><input type="range" id="volumeSlider" class="form-range" min="0" max="1" step="0.05" value="1"></div>
@@ -100,13 +100,13 @@
             </div>
         </div>
         <div class="col-md-4">
-            <h5>频道列表 <span id="channelCount" class="badge bg-primary">0</span></h5>
+            <h5>频道清單 <span id="channelCount" class="badge bg-primary">0</span></h5>
             <input type="text" id="searchInput" class="form-control bg-dark text-white mt-2" placeholder="搜寻频道">
             <div class="mt-2">
                 <button class="channel-type-btn active" id="liveChannelsBtn" onclick="window.switchChannelType('live')"><span>📺 直播</span><span id="liveChannelCount" class="badge bg-secondary">0</span></button>
                 <button class="channel-type-btn" id="vodChannelsBtn" onclick="window.switchChannelType('vod')"><span>🎬 点播</span><span id="vodChannelCount" class="badge bg-secondary">0</span></button>
             </div>
-            <div class="channel-list mt-2" id="channelList">请选择播放模式</div>
+            <div class="channel-list mt-2" id="channelList">请選擇播放模式</div>
         </div>
     </div>
 </div>
@@ -173,11 +173,11 @@
         updateStatus('ready', `${currentChannelNameForQuality} (${qualityLabel})`);
     }
 
-    // ==================== 画质选择器核心 ====================
+    // ==================== 画质選擇器核心 ====================
     function updateQualitySelector(levels) {
         if (!levels || levels.length <= 1) {
             qualitySelectorDiv.style.display = 'none';
-            console.log('[画质] 单码率，隐藏选择器');
+            console.log('[画质] 单码率，隐藏選擇器');
             return;
         }
         qualitySelectorDiv.style.display = 'inline-block';
@@ -255,7 +255,7 @@
         video.pause();
         video.currentTime = 0;
         progressBar.value = 0;
-        updateStatus('loading', `加载 ${name}...`);
+        updateStatus('loading', `載入 ${name}...`);
         clearCountdown();
         currentChannelIndex = index;
         currentChannelGroup = group;
@@ -384,7 +384,7 @@
         playChannel(ch.url, ch.name, ch.group, ch.logo, ch.tvgId, newIdx, currentChannelType);
     }
 
-    // ==================== 频道列表渲染 ====================
+    // ==================== 频道清單渲染 ====================
     function renderLiveChannels() {
         let container = document.getElementById('channelList');
         if (!filteredLive.length) { container.innerHTML = '<div class="text-muted text-center">无直播频道</div>'; return; }
@@ -459,11 +459,11 @@
         }
     });
 
-    // ==================== 加载播放列表====================
+    // ==================== 載入播放清單====================
     async function loadPlaylist(filename) {
         if(window.currentPlaylist === filename) return;
         window.currentPlaylist = filename;
-        updateStatus('loading', '加载列表...');
+        updateStatus('loading', '載入清單...');
         try {
             let res = await fetch(`/api/playlist-content?filename=${encodeURIComponent(filename)}`);
             let data = await res.json();
@@ -476,7 +476,7 @@
             document.getElementById('liveChannelCount').innerText = liveChannels.length;
             document.getElementById('vodChannelCount').innerText = vodChannels.length;
             switchChannelType('live');
-            updateStatus('ready', `已加载 ${allChannels.length} 频道`);
+            updateStatus('ready', `已載入 ${allChannels.length} 频道`);
         } catch(e) { updateStatus('error', e.message); }
     }
     async function loadPlaylistOptions() {

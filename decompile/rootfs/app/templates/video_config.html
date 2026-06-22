@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>线路与 API 设置</title>
+    <title>线路与 API 設定</title>
     <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📺</text></svg>" type="image/svg+xml">
@@ -40,7 +40,7 @@
         <div class="card-header-custom">
             <div class="d-flex flex-wrap align-items-center justify-content-between">
                 <div>
-                    <h3><i class="bi bi-broadcast"></i> 线路与 API 设置</h3>
+                    <h3><i class="bi bi-broadcast"></i> 线路与 API 設定</h3>
                     <p>精细控制 APP/TV 线路、API 切换策略 | 提升播放成功率</p>
                 </div>
                 <a href="/config/mappings" class="btn btn-light btn-sm mt-2 mt-sm-0">
@@ -74,9 +74,9 @@
             {% endif %}
 
             <form id="videoConfigForm">
-                <!-- 线路选择 -->
+                <!-- 线路選擇 -->
                 <div class="section-title">
-                    <i class="bi bi-signpost-split me-2"></i> 线路选择
+                    <i class="bi bi-signpost-split me-2"></i> 线路選擇
                 </div>
                 <p class="text-muted-custom mb-3">不同的线路可能影响播放流畅度及兼容性。</p>
 
@@ -101,7 +101,7 @@
                         <option value="1" {% if tv_stream_source == 1 %}selected{% endif %}>线路1 · 官方 CDN</option>
                     </select>
                     <div class="form-text small text-muted">
-                        仅对特定频道（启用 TV API 时）生效。
+                        仅对特定频道（啟用 TV API 时）生效。
                         {% if tv_stream_source_locked %}<span class="badge-env badge">环境变量锁定</span>{% endif %}
                     </div>
                 </div>
@@ -114,8 +114,8 @@
                     <div class="d-flex align-items-center justify-content-between flex-wrap">
                         <div>
                             <i class="bi bi-cloud-upload fs-5 me-2"></i>
-                            <strong>启用 TV API（仅对特定频道生效）</strong>
-                            <div class="small text-muted mt-1">开启后，特定频道列表内的频道将优先使用 TV 端 API 获取播放地址；关闭则全部使用 APP API。</div>
+                            <strong>啟用 TV API（仅对特定频道生效）</strong>
+                            <div class="small text-muted mt-1">开启后，特定频道清單内的频道将优先使用 TV 端 API 获取播放地址；关闭则全部使用 APP API。</div>
                             {% if use_tv_api_locked %}
                             <div class="small text-warning mt-1"><i class="bi bi-lock-fill"></i> 已由环境变量 USE_TV_API_FOR_SPECIAL 锁定</div>
                             {% endif %}
@@ -169,10 +169,10 @@
 
                 <div class="d-flex flex-wrap gap-3 mt-4">
                     <button type="submit" class="btn btn-gradient px-4" id="submitBtn">
-                        <i class="bi bi-save"></i> 保存设定 & 清除缓存
+                        <i class="bi bi-save"></i> 儲存设定 & 清除缓存
                     </button>
                     <button type="button" class="btn btn-outline-secondary-custom" id="resetToCurrent">
-                        <i class="bi bi-arrow-repeat"></i> 重置目前配置
+                        <i class="bi bi-arrow-repeat"></i> 重設目前配置
                     </button>
                 </div>
             </form>
@@ -189,19 +189,19 @@
                         <div>
                             <i class="bi bi-hourglass-split me-1 fs-5"></i>
                             <strong>目前缓存数量</strong>
-                            <span id="cache-count" class="ms-2 badge bg-secondary">加载中...</span>
+                            <span id="cache-count" class="ms-2 badge bg-secondary">載入中...</span>
                         </div>
                         <div class="mt-2 mt-sm-0">
                             <button type="button" id="clear-cache-btn" class="btn btn-sm btn-outline-danger">
                                 <i class="bi bi-trash3"></i> 立即清空缓存
                             </button>
                             <button type="button" id="refresh-cache-count" class="btn btn-sm btn-outline-info ms-2">
-                                <i class="bi bi-arrow-clockwise"></i> 刷新
+                                <i class="bi bi-arrow-clockwise"></i> 重新整理
                             </button>
                         </div>
                     </div>
                     <div class="small text-muted-custom">
-                        <i class="bi bi-info-circle-fill"></i> 切换线路或 API 设置后，系统会自动清除相关缓存，下次播放将重新获取地址。
+                        <i class="bi bi-info-circle-fill"></i> 切换线路或 API 設定后，系统会自动清除相关缓存，下次播放将重新获取地址。
                     </div>
                 </div>
             </div>
@@ -211,13 +211,13 @@
             <div class="mt-2 p-3 bg-light bg-opacity-50 rounded-3">
                 <h6 class="fw-semibold"><i class="bi bi-lightbulb text-warning"></i> 使用建议</h6>
                 <ul class="small text-muted-custom mb-0 ps-3">
-                    <li>遇到播放卡顿或无法加载时，可尝试切换线路并清空缓存。</li>
+                    <li>遇到播放卡顿或无法載入时，可尝试切换线路并清空缓存。</li>
                     <li>线路 0 (Hinet CDN) 在部分地区宽带环境下表现更优；线路 1 (官方) 整体兼容性最佳。</li>
                     <li>切换线路后系统会自动清除该频道的播放缓存，确保新线路立即生效。</li>
                     <li>「清空缓存」按钮会清除所有频道的播放地址缓存，不影响其他配置。</li>
-                    <li>「自动提取最高解析度」开启后，无论选择线路0还是1，都会尝试返回最高码率流。</li>
+                    <li>「自动提取最高解析度」开启后，无论選擇线路0还是1，都会尝试返回最高码率流。</li>
                     <li>「使用 TV API」开关可改变部分频道获取播放地址的接口。</li>
-                    <li>「自动切换 API 与 线路」开启后，播放失败时会自动尝试其他线路和 API 组合，提高成功率。</li>
+                    <li>「自动切换 API 与 线路」开启后，播放失敗时会自动尝试其他线路和 API 组合，提高成功率。</li>
                 </ul>
             </div>
         </div>
@@ -239,7 +239,7 @@
         const clearCacheBtn = document.getElementById('clear-cache-btn');
         const refreshCacheBtn = document.getElementById('refresh-cache-count');
 
-        // 目前保存的值（由模板注入）
+        // 目前儲存的值（由模板注入）
         let currentAppSource = {{ app_stream_source|default(0) }};
         let currentTvSource = {{ tv_stream_source|default(0) }};
         let currentUseTvApi = {% if use_tv_api %}true{% else %}false{% endif %};
@@ -275,7 +275,7 @@
                 if (data.success && data.cache_stats && typeof data.cache_stats.play_url_cache !== 'undefined') {
                     cacheCountSpan.innerText = `${data.cache_stats.play_url_cache} 个播放地址`;
                 } else {
-                    cacheCountSpan.innerText = '获取失败';
+                    cacheCountSpan.innerText = '获取失敗';
                 }
             } catch (err) {
                 console.warn('缓存统计API异常', err);
@@ -295,7 +295,7 @@
                     showTemporaryAlert('缓存已清空，播放新地址将立即生效', 'success');
                     updateCacheCount();
                 } else {
-                    showTemporaryAlert('清空缓存失败: ' + (data.message || '未知错误'), 'danger');
+                    showTemporaryAlert('清空缓存失敗: ' + (data.message || '未知错误'), 'danger');
                 }
             } catch (err) {
                 console.error(err);
@@ -305,13 +305,13 @@
 
         async function saveAllSettings() {
             if (isSaving) {
-                showTemporaryAlert('正在保存中，请稍后...', 'info');
+                showTemporaryAlert('正在儲存中，請稍候...', 'info');
                 return;
             }
             isSaving = true;
             const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 保存中...';
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 儲存中...';
 
             const newAppSource = parseInt(appSelect.value);
             const newTvSource = parseInt(tvSelect.value);
@@ -343,7 +343,7 @@
                     showTemporaryAlert(`✅ ${data.message}`, 'success');
                     updateCacheCount();
                 } else if (data.error) {
-                    showTemporaryAlert(`❌ 保存失败: ${data.error}`, 'danger');
+                    showTemporaryAlert(`❌ 儲存失敗: ${data.error}`, 'danger');
                     // 回滚 UI
                     appSelect.value = currentAppSource;
                     tvSelect.value = currentTvSource;
@@ -351,11 +351,11 @@
                     autoSwitchApi.checked = currentAutoSwitchApi;
                     compatModeSwitch.checked = currentCompatMode;
                 } else {
-                    showTemporaryAlert('保存成功，但服务器未返回明确信息', 'info');
+                    showTemporaryAlert('儲存成功，但服务器未返回明确資訊', 'info');
                 }
             } catch (error) {
-                console.error('保存错误:', error);
-                showTemporaryAlert('网络错误，请稍后再试', 'danger');
+                console.error('儲存错误:', error);
+                showTemporaryAlert('网络错误，請稍候再试', 'danger');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
@@ -369,7 +369,7 @@
             if (!useTvApiLocked) useTvApiSwitch.checked = currentUseTvApi;
             if (!autoSwitchApiLocked) autoSwitchApi.checked = currentAutoSwitchApi;
             if (!compatModeLocked) compatModeSwitch.checked = currentCompatMode;
-            showTemporaryAlert('已重置为目前保存的配置', 'info');
+            showTemporaryAlert('已重設为目前儲存的配置', 'info');
         }
 
         function init() {

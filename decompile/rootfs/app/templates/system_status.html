@@ -57,7 +57,7 @@
                         <div class="mb-3">
                             <strong>完整流媒体代理:</strong>
                             <span class="badge {% if status.ts_proxy_enabled %}bg-success{% else %}bg-secondary{% endif %} status-badge">
-                                {% if status.ts_proxy_enabled %}已启用{% else %}已禁用{% endif %}
+                                {% if status.ts_proxy_enabled %}已啟用{% else %}已停用{% endif %}
                             </span>
                         </div>
                     </div>
@@ -67,7 +67,7 @@
             <div class="col-md-6">
                 <div class="card status-card">
                     <div class="card-header">
-                        <h5 class="card-title mb-0">系统信息</h5>
+                        <h5 class="card-title mb-0">系统資訊</h5>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
@@ -76,9 +76,9 @@
                         <div class="mb-3">
                             <strong>反向代理:</strong>
                             {% if status.reverse_proxy %}
-                                <span class="badge bg-info status-badge">已设置</span>
+                                <span class="badge bg-info status-badge">已設定</span>
                             {% else %}
-                                <span class="badge bg-secondary status-badge">未设置</span>
+                                <span class="badge bg-secondary status-badge">未設定</span>
                             {% endif %}
                         </div>
                         <div class="mb-3">
@@ -97,7 +97,7 @@
                 <i class="bi bi-arrow-left"></i> 返回
             </a>
             <button onclick="location.reload()" class="btn btn-primary">
-                <i class="bi bi-arrow-clockwise"></i> 刷新状态
+                <i class="bi bi-arrow-clockwise"></i> 重新整理状态
             </button>
         </div>
     </div>

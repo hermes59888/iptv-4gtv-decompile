@@ -131,7 +131,7 @@
         }
 
         function deleteToken(token) {
-            if (confirm('确定要删除此Token吗？此操作无法恢复。')) {
+            if (confirm('确定要刪除此Token吗？此操作无法恢复。')) {
                 const data = {
                     action: 'delete_single',
                     token_to_delete: token
@@ -188,7 +188,7 @@
                 <input id="customTokenInput" class="form-control" pattern="[A-Za-z0-9]{64}" 
                        placeholder="输入64位字母数字组合" required type="text">
                 <div class="form-text">
-                    请输入64位字母数字组合的Token
+                    請輸入64位字母数字组合的Token
                 </div>
             </div>
 			<button class="btn btn-success" onclick="addCustomToken()">
@@ -205,15 +205,15 @@
 			<p class="notice">⚠️ 替换操作将使所有旧Token立即失效</p>
 		</div>
 		
-		<!-- 有效Token列表 -->
+		<!-- 有效Token清單 -->
 		<div class="token-section">
-			<h3><i class="bi bi-list-check"></i> 有效Token列表</h3>
+			<h3><i class="bi bi-list-check"></i> 有效Token清單</h3>
             {% if valid_tokens %}
             <ul>
                 {% for token in valid_tokens %}
                 <li>
                     <div class="token-display token-item">{{ token }}</div>
-                    <button class="btn delete-btn" onclick="deleteToken('{{ token }}')" title="删除此Token">
+                    <button class="btn delete-btn" onclick="deleteToken('{{ token }}')" title="刪除此Token">
                         <i class="bi bi-trash"></i>
                     </button>
                 </li>

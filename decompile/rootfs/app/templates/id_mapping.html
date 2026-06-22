@@ -76,7 +76,7 @@
         }
 
         async function deleteMapping(key) {
-            if (!confirm('确定要删除此映射吗？')) {
+            if (!confirm('确定要刪除此映射吗？')) {
                 return;
             }
             
@@ -127,7 +127,7 @@
                     <div class="col-md-4">
                         <label for="provider" class="form-label">来源</label>
                         <select class="form-select" id="provider" name="provider">
-                            <option value="">请选择</option>
+                            <option value="">请選擇</option>
                             <option value="fourgtv">fourgtv</option>
                             <option value="ofiii">ofiii</option>
                         </select>
@@ -169,7 +169,7 @@
                             <td>{{ value[1] }}</td>
                             <td>
                                 <button type="button" onclick="deleteMapping('{{ key }}')" class="btn btn-sm btn-danger">
-                                    <i class="bi bi-trash"></i> 删除
+                                    <i class="bi bi-trash"></i> 刪除
                                 </button>
                              </td>
                         </tr>

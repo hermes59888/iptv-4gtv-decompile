@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>代理设置</title>
+    <title>代理設定</title>
     <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📺</text></svg>" type="image/svg+xml">
@@ -84,7 +84,7 @@
             trojan: []
         };
 
-        // 初始化加载节点代理列表
+        // 初始化載入节点代理清單
         async function loadProxyServers() {
             try {
                 const response = await fetch('/config/proxy-servers');
@@ -96,11 +96,11 @@
                     updateCurrentProxyStatus();
                 }
             } catch (error) {
-                console.error('加载节点代理失败:', error);
+                console.error('載入节点代理失敗:', error);
             }
         }
 
-        // 渲染节点列表
+        // 渲染节点清單
         function renderServerLists() {
             renderServerList('vless', proxyServers.vless);
             renderServerList('vmess', proxyServers.vmess);
@@ -122,7 +122,7 @@
                         <div>
                             <h6 class="mb-1">
                                 <i class="bi bi-server"></i> ${escapeHtml(server.name) || '未命名节点'}
-                                ${server.enabled ? '<span class="badge bg-success ms-2">启用</span>' : '<span class="badge bg-secondary ms-2">关闭</span>'}
+                                ${server.enabled ? '<span class="badge bg-success ms-2">啟用</span>' : '<span class="badge bg-secondary ms-2">关闭</span>'}
                             </h6>
                             <small class="text-muted">${escapeHtml(server.url.substring(0, 80))}...</small>
                         </div>
@@ -139,14 +139,14 @@
                             <i class="bi bi-play-circle"></i> 测试
                         </button>
                         <button class="btn btn-sm btn-outline-warning" onclick="editServer('${type}', ${index})">
-                            <i class="bi bi-pencil"></i> 编辑
+                            <i class="bi bi-pencil"></i> 編輯
                         </button>
                         <button class="btn btn-sm btn-outline-danger" onclick="deleteServer('${type}', ${index})">
-                            <i class="bi bi-trash"></i> 删除
+                            <i class="bi bi-trash"></i> 刪除
                         </button>
                         <button class="btn btn-sm btn-outline-${server.enabled ? 'secondary' : 'success'}" 
                                 onclick="toggleServer('${type}', ${index})">
-                            <i class="bi bi-${server.enabled ? 'pause' : 'play'}"></i> ${server.enabled ? '关闭' : '启用'}
+                            <i class="bi bi-${server.enabled ? 'pause' : 'play'}"></i> ${server.enabled ? '关闭' : '啟用'}
                         </button>
                     </div>
                 `;
@@ -184,7 +184,7 @@
             document.getElementById('serverName').value = '';
             document.getElementById('serverUrl').value = '';
             document.getElementById('serverEnabled').checked = true;
-            document.getElementById('serverModalTitle').textContent = `添加 ${type.toUpperCase()} 节点`;
+            document.getElementById('serverModalTitle').textContent = `新增 ${type.toUpperCase()} 节点`;
             document.getElementById('serverModal').style.display = 'block';
         }
 
@@ -212,7 +212,7 @@
             document.getElementById('serverName').value = server.name;
             document.getElementById('serverUrl').value = server.url;
             document.getElementById('serverEnabled').checked = server.enabled;
-            document.getElementById('serverModalTitle').textContent = `编辑 ${type.toUpperCase()} 节点`;
+            document.getElementById('serverModalTitle').textContent = `編輯 ${type.toUpperCase()} 节点`;
             document.getElementById('serverModal').style.display = 'block';
             document.getElementById('serverModal').setAttribute('data-edit-index', index);
         }
@@ -236,7 +236,7 @@
         }
 
         async function deleteServer(type, index) {
-            if (!confirm('确定要删除此节点吗？')) return;
+            if (!confirm('确定要刪除此节点吗？')) return;
             proxyServers[type].splice(index, 1);
             await saveProxyServers();
             await loadProxyServers();
@@ -287,7 +287,7 @@
                 } else {
                     progressBar.style.width = '100%';
                     progressBar.textContent = '100%';
-                    statusDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-danger"></i> 测试失败: ${escapeHtml(result.error)}`;
+                    statusDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-danger"></i> 测试失敗: ${escapeHtml(result.error)}`;
                     setTimeout(() => modal.hide(), 2000);
                 }
             } catch (error) {
@@ -299,9 +299,9 @@
             }
         }
 
-        // 批量测试所有已启用的节点（不区分协议）
+        // 批量测试所有已啟用的节点（不区分协议）
         async function batchTestAllServers() {
-            // 收集所有启用的节点
+            // 收集所有啟用的节点
             const allServers = [];
             for (const type of ['vless', 'vmess', 'trojan']) {
                 proxyServers[type].forEach((server, index) => {
@@ -312,7 +312,7 @@
             }
 
             if (allServers.length === 0) {
-                alert('没有启用的节点可测试');
+                alert('沒有啟用的节点可测试');
                 return;
             }
 
@@ -342,7 +342,7 @@
                         proxyServers[type][index].latency = null;
                     }
                 } catch (error) {
-                    console.error(`测试 ${server.name} 失败:`, error);
+                    console.error(`测试 ${server.name} 失敗:`, error);
                     proxyServers[type][index].latency = null;
                 }
 
@@ -353,9 +353,9 @@
                 await new Promise(resolve => setTimeout(resolve, 500));
             }
 
-            // 保存更新后的延迟信息
+            // 儲存更新后的延迟資訊
             await saveProxyServers();
-            // 重新渲染列表以显示新的延迟
+            // 重新渲染清單以显示新的延迟
             await loadProxyServers();
 
             statusDiv.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> 测试完成！共测试 ${total} 个节点。`;
@@ -372,9 +372,9 @@
                     body: JSON.stringify({ servers: proxyServers })
                 });
                 const result = await response.json();
-                if (!result.success) console.error('保存失败:', result.error);
+                if (!result.success) console.error('儲存失敗:', result.error);
             } catch (error) {
-                console.error('保存失败:', error);
+                console.error('儲存失敗:', error);
             }
         }
 
@@ -410,15 +410,15 @@
                     el.innerHTML = '<i class="bi bi-globe"></i> 直连';
                 }
             } catch (error) {
-                console.error('获取代理状态失败:', error);
+                console.error('获取代理状态失敗:', error);
             }
         }
 
         // ==================== 导出/导入节点配置 ====================
         function exportServers() {
-            // 确保数据已加载
+            // 确保数据已載入
             if (!proxyServers.vless && !proxyServers.vmess && !proxyServers.trojan) {
-                alert('配置尚未加载完成，请稍后再试');
+                alert('配置尚未載入完成，請稍候再试');
                 return;
             }
             const dataStr = JSON.stringify(proxyServers, null, 2);
@@ -449,11 +449,11 @@
                         const imported = JSON.parse(content);
                         // 基本校验：必须包含三个协议键且均为数组
                         if (!imported.hasOwnProperty('vless') || !imported.hasOwnProperty('vmess') || !imported.hasOwnProperty('trojan')) {
-                            alert('导入失败：无效的配置档案格式，缺少必要的协议键(vless/vmess/trojan)');
+                            alert('导入失敗：无效的配置档案格式，缺少必要的协议键(vless/vmess/trojan)');
                             return;
                         }
                         if (!Array.isArray(imported.vless) || !Array.isArray(imported.vmess) || !Array.isArray(imported.trojan)) {
-                            alert('导入失败：协议字段必须是数组');
+                            alert('导入失敗：协议字段必须是数组');
                             return;
                         }
                         if (!confirm('导入将替换目前所有代理节点配置，是否继续？')) return;
@@ -472,13 +472,13 @@
                         importBtn.disabled = false;
                         importBtn.innerHTML = originalText;
                         if (result.success) {
-                            alert('导入成功，正在刷新配置...');
+                            alert('导入成功，正在重新整理配置...');
                             await loadProxyServers();
                         } else {
-                            alert('导入失败: ' + (result.error || '未知错误'));
+                            alert('导入失敗: ' + (result.error || '未知错误'));
                         }
                     } catch (err) {
-                        alert('解析档案失败: ' + err.message);
+                        alert('解析档案失敗: ' + err.message);
                     }
                 };
                 reader.readAsText(file, 'utf-8');
@@ -492,7 +492,7 @@
             if (updateBtn) {
                 updateBtn.addEventListener('click', async function() {
                     const version = document.getElementById('xrayVersion').value.trim();
-                    if (!version) { alert('请输入版本号'); return; }
+                    if (!version) { alert('請輸入版本号'); return; }
                     if (!confirm(`确定要更新 Xray 到版本 ${version} 吗？\n此操作会停止目前代理并清空 xray 资料夹。`)) return;
 
                     const modal = new bootstrap.Modal(document.getElementById('xrayUpdateModal'));
@@ -518,7 +518,7 @@
                         } else {
                             progressBar.style.width = '100%';
                             progressBar.textContent = '100%';
-                            statusDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-danger"></i> 更新失败: ${escapeHtml(result.error)}`;
+                            statusDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-danger"></i> 更新失敗: ${escapeHtml(result.error)}`;
                             setTimeout(() => modal.hide(), 3000);
                         }
                     } catch (error) {
@@ -570,7 +570,7 @@
 </head>
 <body>
     <div class="config-container">
-        <h1 class="mb-4"><i class="bi bi-hdd-network"></i> 代理设置</h1>
+        <h1 class="mb-4"><i class="bi bi-hdd-network"></i> 代理設定</h1>
 
         {% if message %}
         <div class="alert {% if '❌' in message %}alert-danger{% else %}alert-success{% endif %}">
@@ -632,7 +632,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="mb-0"><i class="bi bi-lightning-charge text-primary"></i> VLESS 节点</h5>
                         <button type="button" class="btn btn-primary btn-sm" onclick="showAddServerModal('vless')">
-                            <i class="bi bi-plus-circle"></i> 添加节点
+                            <i class="bi bi-plus-circle"></i> 新增节点
                         </button>
                     </div>
                     <div id="vlessServerList" class="server-list"></div>
@@ -643,7 +643,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="mb-0"><i class="bi bi-shield-check text-success"></i> VMess 节点</h5>
                         <button type="button" class="btn btn-primary btn-sm" onclick="showAddServerModal('vmess')">
-                            <i class="bi bi-plus-circle"></i> 添加节点
+                            <i class="bi bi-plus-circle"></i> 新增节点
                         </button>
                     </div>
                     <div id="vmessServerList" class="server-list"></div>
@@ -654,31 +654,31 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="mb-0"><i class="bi bi-shield-lock text-info"></i> Trojan 节点</h5>
                         <button type="button" class="btn btn-primary btn-sm" onclick="showAddServerModal('trojan')">
-                            <i class="bi bi-plus-circle"></i> 添加节点
+                            <i class="bi bi-plus-circle"></i> 新增节点
                         </button>
                     </div>
                     <div id="trojanServerList" class="server-list"></div>
                 </div>
             </div>
 
-            <!-- 代理设置 -->
+            <!-- 代理設定 -->
             <div class="mb-4">
-                <h4><i class="bi bi-gear"></i> 代理设置</h4>
+                <h4><i class="bi bi-gear"></i> 代理設定</h4>
                 <div class="form-check form-switch mb-3">
                     <input class="form-check-input" type="checkbox" id="autoSelectBest" name="auto_select_best" {% if auto_select_best %}checked{% endif %} value="true">
-                    <label class="form-check-label" for="autoSelectBest"><strong>自动选择最佳节点（根据延迟）</strong></label>
-                    <div class="form-text">启用后，系统会自动选择延迟最低的可用代理节点，并定期测试所有节点代理的延迟</div>
+                    <label class="form-check-label" for="autoSelectBest"><strong>自动選擇最佳节点（根据延迟）</strong></label>
+                    <div class="form-text">啟用后，系统会自动選擇延迟最低的可用代理节点，并定期测试所有节点代理的延迟</div>
                 </div>
                 <div class="form-check form-switch mb-3">
                     <input class="form-check-input" type="checkbox" id="proxyEnabled" name="proxy_enabled" {% if proxy_enabled %}checked{% endif %} value="true">
-                    <label class="form-check-label" for="proxyEnabled"><strong>启用常规代理（备用）</strong></label>
+                    <label class="form-check-label" for="proxyEnabled"><strong>啟用常规代理（备用）</strong></label>
                     <div class="form-text">当 VLESS/VMess/Trojan 代理不可用时，使用外部代理节点</div>
                 </div>
             </div>
 
-            <!-- 常规代理设置 -->
+            <!-- 常规代理設定 -->
             <div class="mb-4">
-                <h4><i class="bi bi-link-45deg"></i> 常规代理设置</h4>
+                <h4><i class="bi bi-link-45deg"></i> 常规代理設定</h4>
                 <div class="mb-3">
                     <label for="httpProxy" class="form-label">HTTP代理地址</label>
                     <input type="text" class="form-control" id="httpProxy" name="http_proxy" value="{{ http_proxy or '' }}" placeholder="例如: http://username:password@proxy.example.com:8080">
@@ -693,9 +693,9 @@
                 </div>
             </div>
 
-            <!-- 其他设置 -->
+            <!-- 其他設定 -->
             <div class="mb-4">
-                <h4><i class="bi bi-sliders"></i> 其他设置</h4>
+                <h4><i class="bi bi-sliders"></i> 其他設定</h4>
                 <div class="mb-3">
                     <label for="reverseProxyAddress" class="form-label">反向代理地址</label>
                     <input type="text" class="form-control" id="reverseProxyAddress" name="reverse_proxy_address" value="{{ reverse_proxy_address or '' }}" placeholder="例如: https://your-domain.com">
@@ -703,18 +703,18 @@
                 <div class="mb-3">
                     <label for="latencyTestInterval" class="form-label">节点代理延迟测试间隔(分钟)</label>
                     <input type="number" class="form-control" id="latencyTestInterval" name="latency_test_interval" value="{{ latency_test_interval }}" min="0" step="1">
-                    <div class="form-text">设置自动测试节点代理延迟的间隔时间(分钟)，仅在自动选择最佳节点代理启用时生效。设为0可禁用定期测试。</div>
+                    <div class="form-text">設定自动测试节点代理延迟的间隔时间(分钟)，仅在自动選擇最佳节点代理啟用时生效。设为0可停用定期测试。</div>
                 </div>
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="tsProxyEnabled" name="ts_proxy_enabled" {% if ts_proxy_enabled %}checked{% endif %} value="true">
                     <label class="form-check-label" for="tsProxyEnabled"><strong>完整流媒体代理</strong></label>
-                    <div class="form-text">启用后，所有流媒体数据都会通过服务器转发，播放端无需特定网络即可观看。</div>
+                    <div class="form-text">啟用后，所有流媒体数据都会通过服务器转发，播放端无需特定网络即可观看。</div>
                 </div>
             </div>
 
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                 <a href="/config/mappings" class="btn btn-secondary me-md-2"><i class="bi bi-arrow-left"></i> 返回</a>
-                <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> 保存设置</button>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> 儲存設定</button>
             </div>
         </form>
 
@@ -737,12 +737,12 @@
             </div>
         </div>
 
-        <!-- 模态框：添加/编辑节点 -->
+        <!-- 模态框：新增/編輯节点 -->
         <div id="serverModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1050;">
             <div class="modal-dialog" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="serverModalTitle">添加节点</h5>
+                        <h5 class="modal-title" id="serverModalTitle">新增节点</h5>
                         <button type="button" class="btn-close" onclick="hideServerModal()"></button>
                     </div>
                     <div class="modal-body">
@@ -753,16 +753,16 @@
                         </div>
                         <div class="mb-3">
                             <label for="serverUrl" class="form-label">节点URL</label>
-                            <textarea class="form-control" id="serverUrl" rows="3" placeholder="请输入完整的代理URL"></textarea>
+                            <textarea class="form-control" id="serverUrl" rows="3" placeholder="請輸入完整的代理URL"></textarea>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="serverEnabled" checked>
-                            <label class="form-check-label" for="serverEnabled">启用此节点</label>
+                            <label class="form-check-label" for="serverEnabled">啟用此节点</label>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" onclick="hideServerModal()">取消</button>
-                        <button type="button" class="btn btn-primary" onclick="document.getElementById('serverModal').hasAttribute('data-edit-index') ? updateServer() : saveServer()">保存</button>
+                        <button type="button" class="btn btn-primary" onclick="document.getElementById('serverModal').hasAttribute('data-edit-index') ? updateServer() : saveServer()">儲存</button>
                     </div>
                 </div>
             </div>
@@ -829,14 +829,14 @@
         <div class="mt-5 p-3 bg-light rounded">
             <h5><i class="bi bi-info-circle"></i> 配置说明</h5>
             <ul class="mb-0">
-                <li><strong>多代理支持</strong>: 可以添加多个 VLESS/VMess/Trojan 节点，系统会根据延迟自动选择最佳节点代理</li>
-                <li><strong>自动选择</strong>: 启用后系统会定期测试所有节点代理的延迟，并自动切换到最快的可用节点代理</li>
-                <li><strong>延迟测试间隔</strong>: 设置自动测试代理延迟的间隔分钟数，仅在自动选择启用时生效</li>
+                <li><strong>多代理支持</strong>: 可以新增多个 VLESS/VMess/Trojan 节点，系统会根据延迟自动選擇最佳节点代理</li>
+                <li><strong>自动選擇</strong>: 啟用后系统会定期测试所有节点代理的延迟，并自动切换到最快的可用节点代理</li>
+                <li><strong>延迟测试间隔</strong>: 設定自动测试代理延迟的间隔分钟数，仅在自动選擇啟用时生效</li>
                 <li><strong>动态端口</strong>: Xray 内部端口自动适配 Docker 映射端口 (目前: {{ xray_port }})</li>
                 <li><strong>Xray 版本管理</strong>: 可以手动更新 Xray 核心版本，更新后需要重新启动代理</li>
                 <li><strong>Xray 官网</strong>: https://github.com/XTLS/Xray-core/releases</li>
                 <li><strong>导出/导入节点配置</strong>: 支持将所有 VLESS/VMess/Trojan 节点配置导出为 JSON 档案，或从 JSON 档案导入恢复配置（导入将完全替换现有配置）。</li>
-                <li><strong>完整流媒体代理</strong>: 启用后，所有流媒体数据都会通过服务器转发，播放端无需特定网络即可观看。</li>
+                <li><strong>完整流媒体代理</strong>: 啟用后，所有流媒体数据都会通过服务器转发，播放端无需特定网络即可观看。</li>
             </ul>
         </div>
     </div>
