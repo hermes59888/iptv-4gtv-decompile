@@ -1,31 +1,29 @@
 version: '3.8'
 
 services:
-  iptv-4gtv:
+  iptv-4gtv-rebuild:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: iptv-4gtv-rebuild
+    ports:
+      - "5051:5050"      # 避免衝突
+    environment:
+      - ADMIN_USER=admin
+      - ADMIN_PWD=password
+      - PORT=5050
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+  # 原始映像 (參考)
+  iptv-4gtv-original:
     image: instituteiptv/iptv-4gtv:latest
     container_name: iptv-4gtv
     ports:
-      - "50007:5050"      # Web 管理介面 / API
-      - "2080:1080"       # Xray 代理端口（可選）
+      - "5050:5050"
+      - "1080:1080"
     environment:
-      # 基本設定（皆可在網頁端修改）
-      - PROXY_HOST=0.0.0.0
-      - XRAY_PORT=1080
-      # - ADMIN_USERNAME=admin          # 管理員帳號
-      # - ADMIN_PASSWORD=password       # 管理員密碼（建議修改）
-      # - VALID_TOKENS=yourtoken1,yourtoken2  # 播放 Token（防盜鏈，建議設定）
-      # - STREAM_SOURCE=0               # 線路選擇 0/1
-      # - AUTO_UPDATE_ENABLED=false     # feifei點播自動更新
-      # - AUTO_UPDATE_INTERVAL_HOURS=24
-      # - TS_PROXY_ENABLED=false        # 切片代理
-      # - http_proxy=                   # HTTP 代理
-      # - https_proxy=                  # HTTPS 代理
-      # - COMPAT_MODE=false             # 強制最高畫質
-      # - USE_TV_API_FOR_SPECIAL=false  # TV/APP API 切換
-      # - AUTO_SWITCH_API=false         # 自動切換 API 與線路
-      # - PROXY_LATENCY_TEST_INTERVAL=10
-      # - APP_STREAM_SOURCE=0
-      # - TV_STREAM_SOURCE=0
-    restart: always
-    # volumes:
-    #   - ./data:/app/data              # 如需持久化資料
+      - ADMIN_USER=admin
+      - ADMIN_PWD=password
+    restart: unless-stopped
