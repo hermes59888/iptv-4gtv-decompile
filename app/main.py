@@ -4,7 +4,6 @@ IPTV-4GTV Rebuild - Runnable Version
 """
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
-from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 import os
@@ -12,8 +11,17 @@ import secrets
 
 app = FastAPI(title="IPTV-4GTV", version="1.0.0")
 
-# 設置模版目錄
-templates = Jinja2Templates(directory="app/templates")
+# 設置模版目錄 - 在 Docker 中為 /app/templates
+TEMPLATE_DIR = "/app/templates" if os.path.exists("/app/templates") else "app/templates"
+
+def render_template(filename: str) -> HTMLResponse:
+    """讀取靜態 HTML 模板"""
+    path = os.path.join(TEMPLATE_DIR, filename)
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return HTMLResponse(f.read())
+    except FileNotFoundError:
+        return HTMLResponse(f"<h1>Template {filename} not found</h1>")
 
 # ==================== 設定模型 ====================
 class AdminInitData(BaseModel):
@@ -47,16 +55,16 @@ async def root_handler():
 
 # ---------- 認證相關 ----------
 @app.get("/login", response_class=HTMLResponse)
-async def login_page(request: Request):
+async def login_page():
     """登入頁面"""
-    return templates.TemplateResponse("admin_login.html", {"request": request})
+    return render_template("admin_login.html")
 
 @app.post("/login")
 async def login(request: Request, admin_user: str = Form(), admin_pwd: str = Form()):
     """處理登入"""
     if admin_user == ADMIN_USER and admin_pwd == ADMIN_PWD:
         return RedirectResponse(url="/config/proxy", status_code=303)
-    return templates.TemplateResponse("admin_login.html", {"request": request, "error": "帳號或密碼錯誤"})
+    return HTMLResponse(render_template("admin_login.html").body + '<div class="alert alert-danger">帳號或密碼錯誤</div>')
 
 @app.get("/logout")
 async def logout():
@@ -65,28 +73,19 @@ async def logout():
 
 # ---------- 管理員初始化 ----------
 @app.get("/admin/init")
-async def admin_init_page(request: Request):
+async def admin_init_page():
     """管理員初始化頁面"""
-    return templates.TemplateResponse("admin_init.html", {"request": request})
-
-@app.post("/admin/init")
-async def admin_init(data: AdminInitData):
-    """處理管理員初始化"""
-    return {"success": True, "message": "管理員已初始化"}
+    return render_template("admin_init.html")
 
 # ---------- Token 管理 ----------
 @app.get("/config/token")
-async def token_config_page(request: Request):
+async def token_config_page():
     """Token 設定頁面"""
-    return templates.TemplateResponse("token_config.html", {
-        "request": request,
-        "current_token": current_token,
-        "valid_tokens": valid_tokens
-    })
+    return render_template("token_config.html")
 
 @app.post("/config/update-token")
 async def update_token(data: UpdateTokenData):
-    """更新 Token - 支援 generate/rotate/add_custom/delete_single"""
+    """更新 Token"""
     global current_token, valid_tokens
     
     response = {"success": True, "message": ""}
@@ -103,12 +102,9 @@ async def update_token(data: UpdateTokenData):
 
 # ---------- 代理設定 ----------
 @app.get("/config/proxy")
-async def proxy_config_page(request: Request):
+async def proxy_config_page():
     """代理設定頁面"""
-    return templates.TemplateResponse("proxy_config.html", {
-        "request": request,
-        "servers": proxy_servers
-    })
+    return render_template("proxy_config.html")
 
 @app.get("/config/proxy-servers")
 async def get_proxy_servers():
@@ -127,29 +123,33 @@ async def test_proxy_latency(proxy_type: str, server: Dict = None):
     """測試代理連線延遲 - 模擬結果"""
     return {"success": True, "latency": 50}
 
-@app.get("/config/current-proxy-status")
-async def get_current_proxy_status():
-    """取得目前代理狀態"""
-    return {"proxy_enabled": False}
-
 # ---------- 播放清單 ----------
 @app.get("/get_m3u")
 async def get_m3u():
     """取得 M3U 播放清單"""
-    with open("app/m3u.txt", "r") as f:
-        return f.read()
+    m3u_path = "/app/m3u.txt" if os.path.exists("/app/m3u.txt") else "app/m3u.txt"
+    try:
+        with open(m3u_path, "r") as f:
+            content = f.read()
+        return HTMLResponse(content, media_type="application/vnd.apple.mpegurl")
+    except:
+        return HTMLResponse("#EXTM3U\n")
 
 @app.get("/get_txt")
 async def get_txt():
     """取得 TXT 播放清單"""
-    with open("app/txt.txt", "r") as f:
-        return f.read()
+    txt_path = "/app/txt.txt" if os.path.exists("/app/txt.txt") else "app/txt.txt"
+    try:
+        with open(txt_path, "r") as f:
+            return f.read()
+    except:
+        return ""
 
 # ---------- 系統狀態 ----------
 @app.get("/status")
-async def system_status_page(request: Request):
+async def system_status_page():
     """系統狀態頁面"""
-    return templates.TemplateResponse("system_status.html", {"request": request})
+    return render_template("system_status.html")
 
 @app.get("/health")
 async def health_check():
