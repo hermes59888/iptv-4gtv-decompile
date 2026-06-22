@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代理设置</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📺</text></svg>" type="image/svg+xml">
+    <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 2rem;
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Roboto, 'Segoe UI', sans-serif;
+        }
+        .config-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-check-label {
+            font-weight: 500;
+        }
+        .alert {
+            margin-bottom: 1.5rem;
+        }
+        .status-badge {
+            font-size: 0.875rem;
+            padding: 0.375rem 0.75rem;
+        }
+        .status-card {
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #0d6efd;
+        }
+        .protocol-section {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .protocol-section.active {
+            border-color: #0d6efd;
+            background-color: #f8f9fa;
+        }
+        .server-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .server-item {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: #f8f9fa;
+        }
+        .server-item.active {
+            border-color: #198754;
+            background-color: #d1e7dd;
+        }
+        .latency-badge {
+            font-size: 0.75rem;
+        }
+        .sortable-ghost {
+            opacity: 0.4;
+        }
+        .spin {
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    <script src="https://cdn.bootcdn.net/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script>
+        let proxyServers = {
+            vless: [],
+            vmess: [],
+            trojan: []
+        };
+
+        // 初始化加载节点代理列表
+        async function loadProxyServers() {
+            try {
+                const response = await fetch('/config/proxy-servers');
+                const data = await response.json();
+                if (data.success) {
+                    proxyServers = data.servers;
+                    renderServerLists();
+                    updateBestProxyStatus();
+                    updateCurrentProxyStatus();
+                }
+            } catch (error) {
+                console.error('加载节点代理失败:', error);
+            }
+        }
+
+        // 渲染节点列表
+        function renderServerLists() {
+            renderServerList('vless', proxyServers.vless);
+            renderServerList('vmess', proxyServers.vmess);
+            renderServerList('trojan', proxyServers.trojan);
+        }
+
+        function renderServerList(type, servers) {
+            const container = document.getElementById(`${type}ServerList`);
+            if (!container) return;
+
+            container.innerHTML = '';
+            
+            servers.forEach((server, index) => {
+                const serverItem = document.createElement('div');
+                serverItem.className = `server-item ${server.enabled ? 'active' : ''}`;
+                serverItem.setAttribute('data-index', index);
+                serverItem.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h6 class="mb-1">
+                                <i class="bi bi-server"></i> ${escapeHtml(server.name) || '未命名节点'}
+                                ${server.enabled ? '<span class="badge bg-success ms-2">启用</span>' : '<span class="badge bg-secondary ms-2">关闭</span>'}
+                            </h6>
+                            <small class="text-muted">${escapeHtml(server.url.substring(0, 80))}...</small>
+                        </div>
+                        <div class="text-end">
+                            ${server.latency ? `
+                                <span class="badge ${server.latency < 100 ? 'bg-success' : server.latency < 300 ? 'bg-warning' : 'bg-danger'} latency-badge">
+                                    ${server.latency}ms
+                                </span>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-primary" onclick="testServerConnection('${type}', ${index})">
+                            <i class="bi bi-play-circle"></i> 测试
+                        </button>
+                        <button class="btn btn-sm btn-outline-warning" onclick="editServer('${type}', ${index})">
+                            <i class="bi bi-pencil"></i> 编辑
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteServer('${type}', ${index})">
+                            <i class="bi bi-trash"></i> 删除
+                        </button>
+                        <button class="btn btn-sm btn-outline-${server.enabled ? 'secondary' : 'success'}" 
+                                onclick="toggleServer('${type}', ${index})">
+                            <i class="bi bi-${server.enabled ? 'pause' : 'play'}"></i> ${server.enabled ? '关闭' : '启用'}
+                        </button>
+                    </div>
+                `;
+                container.appendChild(serverItem);
+            });
+
+            // 初始化排序
+            new Sortable(container, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function(evt) {
+                    const items = Array.from(container.children);
+                    const newServers = items.map(item => {
+                        const index = parseInt(item.getAttribute('data-index'));
+                        return servers[index];
+                    });
+                    proxyServers[type] = newServers;
+                    saveProxyServers();
+                }
+            });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        function showAddServerModal(type) {
+            document.getElementById('serverType').value = type;
+            document.getElementById('serverName').value = '';
+            document.getElementById('serverUrl').value = '';
+            document.getElementById('serverEnabled').checked = true;
+            document.getElementById('serverModalTitle').textContent = `添加 ${type.toUpperCase()} 节点`;
+            document.getElementById('serverModal').style.display = 'block';
+        }
+
+        async function saveServer() {
+            const type = document.getElementById('serverType').value;
+            const name = document.getElementById('serverName').value;
+            const url = document.getElementById('serverUrl').value;
+            const enabled = document.getElementById('serverEnabled').checked;
+
+            if (!name || !url) {
+                alert('请填写节点名称和URL');
+                return;
+            }
+
+            const newServer = { name, url, enabled, latency: null };
+            proxyServers[type].push(newServer);
+            await saveProxyServers();
+            hideServerModal();
+            await loadProxyServers();
+        }
+
+        function editServer(type, index) {
+            const server = proxyServers[type][index];
+            document.getElementById('serverType').value = type;
+            document.getElementById('serverName').value = server.name;
+            document.getElementById('serverUrl').value = server.url;
+            document.getElementById('serverEnabled').checked = server.enabled;
+            document.getElementById('serverModalTitle').textContent = `编辑 ${type.toUpperCase()} 节点`;
+            document.getElementById('serverModal').style.display = 'block';
+            document.getElementById('serverModal').setAttribute('data-edit-index', index);
+        }
+
+        async function updateServer() {
+            const type = document.getElementById('serverType').value;
+            const index = document.getElementById('serverModal').getAttribute('data-edit-index');
+            const name = document.getElementById('serverName').value;
+            const url = document.getElementById('serverUrl').value;
+            const enabled = document.getElementById('serverEnabled').checked;
+
+            if (!name || !url) {
+                alert('请填写节点名称和URL');
+                return;
+            }
+
+            proxyServers[type][index] = { ...proxyServers[type][index], name, url, enabled };
+            await saveProxyServers();
+            hideServerModal();
+            await loadProxyServers();
+        }
+
+        async function deleteServer(type, index) {
+            if (!confirm('确定要删除此节点吗？')) return;
+            proxyServers[type].splice(index, 1);
+            await saveProxyServers();
+            await loadProxyServers();
+        }
+
+        async function toggleServer(type, index) {
+            proxyServers[type][index].enabled = !proxyServers[type][index].enabled;
+            await saveProxyServers();
+            await loadProxyServers();
+        }
+
+        async function testServerConnection(type, index) {
+            const server = proxyServers[type][index];
+            const modal = new bootstrap.Modal(document.getElementById('singleTestModal'));
+            const statusDiv = document.getElementById('singleTestStatus');
+            const progressBar = document.getElementById('singleTestProgressBar');
+            
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+            statusDiv.innerHTML = `<i class="bi bi-arrow-repeat spin"></i> 正在测试节点 <strong>${escapeHtml(server.name)}</strong> ...`;
+            modal.show();
+            
+            let interval = setInterval(() => {
+                let current = parseInt(progressBar.style.width) || 0;
+                if (current < 90) {
+                    let newWidth = Math.min(current + 10, 90);
+                    progressBar.style.width = `${newWidth}%`;
+                    progressBar.textContent = `${newWidth}%`;
+                }
+            }, 200);
+            
+            try {
+                const response = await fetch(`/config/test-${type}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: server.url, name: server.name })
+                });
+                clearInterval(interval);
+                const result = await response.json();
+                if (result.success) {
+                    proxyServers[type][index].latency = result.latency;
+                    await saveProxyServers();
+                    progressBar.style.width = '100%';
+                    progressBar.textContent = '100%';
+                    statusDiv.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> 测试成功！延迟: ${result.latency}ms`;
+                    setTimeout(() => modal.hide(), 1500);
+                    await loadProxyServers();
+                } else {
+                    progressBar.style.width = '100%';
+                    progressBar.textContent = '100%';
+                    statusDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-danger"></i> 测试失败: ${escapeHtml(result.error)}`;
+                    setTimeout(() => modal.hide(), 2000);
+                }
+            } catch (error) {
+                clearInterval(interval);
+                progressBar.style.width = '100%';
+                progressBar.textContent = '100%';
+                statusDiv.innerHTML = `<i class="bi bi-x-circle-fill text-danger"></i> 网络错误: ${escapeHtml(error)}`;
+                setTimeout(() => modal.hide(), 2000);
+            }
+        }
+
+        // 批量测试所有已启用的节点（不区分协议）
+        async function batchTestAllServers() {
+            // 收集所有启用的节点
+            const allServers = [];
+            for (const type of ['vless', 'vmess', 'trojan']) {
+                proxyServers[type].forEach((server, index) => {
+                    if (server.enabled) {
+                        allServers.push({ type, index, server });
+                    }
+                });
+            }
+
+            if (allServers.length === 0) {
+                alert('没有启用的节点可测试');
+                return;
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('batchTestModal'));
+            const progressBar = document.getElementById('batchTestProgressBar');
+            const statusDiv = document.getElementById('batchTestStatus');
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+            statusDiv.innerHTML = `准备测试 ${allServers.length} 个节点...`;
+            modal.show();
+
+            let completed = 0;
+            const total = allServers.length;
+
+            for (const { type, index, server } of allServers) {
+                statusDiv.innerHTML = `<i class="bi bi-arrow-repeat spin"></i> 正在测试 ${type.toUpperCase()}: ${escapeHtml(server.name)} (${completed+1}/${total})`;
+                try {
+                    const response = await fetch(`/config/test-${type}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: server.url, name: server.name })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        proxyServers[type][index].latency = result.latency;
+                    } else {
+                        proxyServers[type][index].latency = null;
+                    }
+                } catch (error) {
+                    console.error(`测试 ${server.name} 失败:`, error);
+                    proxyServers[type][index].latency = null;
+                }
+
+                completed++;
+                const percent = Math.round((completed / total) * 100);
+                progressBar.style.width = `${percent}%`;
+                progressBar.textContent = `${percent}%`;
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
+            // 保存更新后的延迟信息
+            await saveProxyServers();
+            // 重新渲染列表以显示新的延迟
+            await loadProxyServers();
+
+            statusDiv.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> 测试完成！共测试 ${total} 个节点。`;
+            progressBar.style.width = '100%';
+            progressBar.textContent = '100%';
+            setTimeout(() => modal.hide(), 2000);
+        }
+
+        async function saveProxyServers() {
+            try {
+                const response = await fetch('/config/update-proxy-servers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ servers: proxyServers })
+                });
+                const result = await response.json();
+                if (!result.success) console.error('保存失败:', result.error);
+            } catch (error) {
+                console.error('保存失败:', error);
+            }
+        }
+
+        function hideServerModal() {
+            document.getElementById('serverModal').style.display = 'none';
+            document.getElementById('serverModal').removeAttribute('data-edit-index');
+        }
+
+        function updateBestProxyStatus() {
+            const all = [
+                ...proxyServers.vless.filter(s => s.enabled && s.latency),
+                ...proxyServers.vmess.filter(s => s.enabled && s.latency),
+                ...proxyServers.trojan.filter(s => s.enabled && s.latency)
+            ];
+            const best = all.length ? all.reduce((a, b) => a.latency < b.latency ? a : b) : null;
+            const el = document.getElementById('bestProxy');
+            el.innerHTML = best ? `<span class="badge bg-success"><i class="bi bi-trophy"></i> 最佳节点: ${escapeHtml(best.name)} (${best.latency}ms)</span>` : '<span class="badge bg-secondary">无可用节点</span>';
+        }
+
+        async function updateCurrentProxyStatus() {
+            try {
+                const res = await fetch('/config/current-proxy-status');
+                const data = await res.json();
+                const el = document.getElementById('currentProxy');
+                if (data.current_protocol) {
+                    el.className = 'badge bg-primary status-badge';
+                    el.innerHTML = `<i class="bi bi-shield-check"></i> ${data.current_protocol.toUpperCase()} 代理 (${escapeHtml(data.current_server_name)})`;
+                } else if (data.proxy_enabled) {
+                    el.className = 'badge bg-warning status-badge';
+                    el.innerHTML = '<i class="bi bi-shield"></i> 常规代理';
+                } else {
+                    el.className = 'badge bg-secondary status-badge';
+                    el.innerHTML = '<i class="bi bi-globe"></i> 直连';
+                }
+            } catch (error) {
+                console.error('获取代理状态失败:', error);
+            }
+        }
+
+        // ==================== 导出/导入节点配置 ====================
+        function exportServers() {
+            // 确保数据已加载
+            if (!proxyServers.vless && !proxyServers.vmess && !proxyServers.trojan) {
+                alert('配置尚未加载完成，请稍后再试');
+                return;
+            }
+            const dataStr = JSON.stringify(proxyServers, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const now = new Date();
+            const timestamp = `${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}_${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}${now.getSeconds().toString().padStart(2,'0')}`;
+            a.download = `xray_servers_export_${timestamp}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function importServers() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = async (evt) => {
+                    try {
+                        const content = evt.target.result;
+                        const imported = JSON.parse(content);
+                        // 基本校验：必须包含三个协议键且均为数组
+                        if (!imported.hasOwnProperty('vless') || !imported.hasOwnProperty('vmess') || !imported.hasOwnProperty('trojan')) {
+                            alert('导入失败：无效的配置档案格式，缺少必要的协议键(vless/vmess/trojan)');
+                            return;
+                        }
+                        if (!Array.isArray(imported.vless) || !Array.isArray(imported.vmess) || !Array.isArray(imported.trojan)) {
+                            alert('导入失败：协议字段必须是数组');
+                            return;
+                        }
+                        if (!confirm('导入将替换目前所有代理节点配置，是否继续？')) return;
+
+                        const importBtn = document.querySelector('#importServersBtn');
+                        const originalText = importBtn.innerHTML;
+                        importBtn.disabled = true;
+                        importBtn.innerHTML = '<i class="bi bi-hourglass-split spin"></i> 导入中...';
+
+                        const response = await fetch('/config/update-proxy-servers', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ servers: imported })
+                        });
+                        const result = await response.json();
+                        importBtn.disabled = false;
+                        importBtn.innerHTML = originalText;
+                        if (result.success) {
+                            alert('导入成功，正在刷新配置...');
+                            await loadProxyServers();
+                        } else {
+                            alert('导入失败: ' + (result.error || '未知错误'));
+                        }
+                    } catch (err) {
+                        alert('解析档案失败: ' + err.message);
+                    }
+                };
+                reader.readAsText(file, 'utf-8');
+            };
+            input.click();
+        }
+
+        // Xray 版本更新
+        document.addEventListener('DOMContentLoaded', function() {
+            const updateBtn = document.getElementById('updateXrayBtn');
+            if (updateBtn) {
+                updateBtn.addEventListener('click', async function() {
+                    const version = document.getElementById('xrayVersion').value.trim();
+                    if (!version) { alert('请输入版本号'); return; }
+                    if (!confirm(`确定要更新 Xray 到版本 ${version} 吗？\n此操作会停止目前代理并清空 xray 资料夹。`)) return;
+
+                    const modal = new bootstrap.Modal(document.getElementById('xrayUpdateModal'));
+                    const progressBar = document.getElementById('xrayUpdateProgressBar');
+                    const statusDiv = document.getElementById('xrayUpdateStatus');
+                    progressBar.style.width = '0%';
+                    progressBar.textContent = '0%';
+                    statusDiv.innerHTML = '<i class="bi bi-arrow-repeat spin"></i> 正在更新 Xray...';
+                    modal.show();
+
+                    try {
+                        const response = await fetch('/config/update-xray-version', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ version: version })
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            progressBar.style.width = '100%';
+                            progressBar.textContent = '100%';
+                            statusDiv.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> ${escapeHtml(result.message)}`;
+                            setTimeout(() => { modal.hide(); location.reload(); }, 2000);
+                        } else {
+                            progressBar.style.width = '100%';
+                            progressBar.textContent = '100%';
+                            statusDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-danger"></i> 更新失败: ${escapeHtml(result.error)}`;
+                            setTimeout(() => modal.hide(), 3000);
+                        }
+                    } catch (error) {
+                        progressBar.style.width = '100%';
+                        progressBar.textContent = '100%';
+                        statusDiv.innerHTML = `<i class="bi bi-x-circle-fill text-danger"></i> 网络错误: ${escapeHtml(error)}`;
+                        setTimeout(() => modal.hide(), 3000);
+                    }
+                });
+            }
+        });
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProxyServers();
+            const form = document.getElementById('proxyConfigForm');
+            if (form) form.addEventListener('submit', updateProxyConfig);
+            const modalDiv = document.getElementById('serverModal');
+            if (modalDiv) modalDiv.addEventListener('click', function(e) { if (e.target === this) hideServerModal(); });
+        });
+
+        async function updateProxyConfig(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = {
+                proxy_enabled: formData.get('proxy_enabled') === 'true',
+                http_proxy: (formData.get('http_proxy') || '').trim(),
+                https_proxy: (formData.get('https_proxy') || '').trim(),
+                socks_proxy: (formData.get('socks_proxy') || '').trim(),
+                reverse_proxy_address: (formData.get('reverse_proxy_address') || '').trim(),
+                ts_proxy_enabled: formData.get('ts_proxy_enabled') === 'true',
+                auto_select_best: formData.get('auto_select_best') === 'true',
+                latency_test_interval: parseInt(formData.get('latency_test_interval') || '10')
+            };
+            try {
+                const response = await fetch('/config/update-proxy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                if (result.error) alert('错误: ' + result.error);
+                else { alert(result.message); setTimeout(updateCurrentProxyStatus, 1000); }
+            } catch (error) {
+                alert('网络错误: ' + error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="config-container">
+        <h1 class="mb-4"><i class="bi bi-hdd-network"></i> 代理设置</h1>
+
+        {% if message %}
+        <div class="alert {% if '❌' in message %}alert-danger{% else %}alert-success{% endif %}">
+            {{ message }}
+        </div>
+        {% endif %}
+
+        <!-- 目前代理使用状态 -->
+        <div class="card status-card">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-info-circle"></i> 目前代理状态</h5>
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <span>目前使用的代理:</span>
+                    <span id="currentProxy" class="badge bg-info status-badge">检测中...</span>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span>最佳可用代理:</span>
+                    <span id="bestProxy" class="badge bg-success status-badge">检测中...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Xray 代理状态显示 -->
+        <div class="mb-4">
+            <div class="d-flex align-items-center">
+                <span class="me-3">Xray 代理状态:</span>
+                {% if vmess_running %}
+                    <span class="badge bg-success status-badge">
+                        <i class="bi bi-play-circle"></i> {{ current_protocol.upper() }} 运行中 (0.0.0.0:{{ xray_port }})
+                    </span>
+                {% else %}
+                    <span class="badge bg-danger status-badge">
+                        <i class="bi bi-stop-circle"></i> 已停止
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <form id="proxyConfigForm">
+            <!-- 节点代理管理 -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+                    <h4 class="mb-2 mb-md-0"><i class="bi bi-list-ul"></i> 节点代理管理</h4>
+                    <div>
+                        <button type="button" class="btn btn-outline-secondary me-2" id="exportServersBtn" onclick="exportServers()">
+                            <i class="bi bi-download"></i> 导出节点配置
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary me-2" id="importServersBtn" onclick="importServers()">
+                            <i class="bi bi-upload"></i> 导入节点配置
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="batchTestAllServers()">
+                            <i class="bi bi-speedometer2"></i> 批量测试
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- VLESS节点 -->
+                <div class="protocol-section">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0"><i class="bi bi-lightning-charge text-primary"></i> VLESS 节点</h5>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="showAddServerModal('vless')">
+                            <i class="bi bi-plus-circle"></i> 添加节点
+                        </button>
+                    </div>
+                    <div id="vlessServerList" class="server-list"></div>
+                </div>
+
+                <!-- VMess 节点 -->
+                <div class="protocol-section">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0"><i class="bi bi-shield-check text-success"></i> VMess 节点</h5>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="showAddServerModal('vmess')">
+                            <i class="bi bi-plus-circle"></i> 添加节点
+                        </button>
+                    </div>
+                    <div id="vmessServerList" class="server-list"></div>
+                </div>
+
+                <!-- Trojan 节点 -->
+                <div class="protocol-section">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0"><i class="bi bi-shield-lock text-info"></i> Trojan 节点</h5>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="showAddServerModal('trojan')">
+                            <i class="bi bi-plus-circle"></i> 添加节点
+                        </button>
+                    </div>
+                    <div id="trojanServerList" class="server-list"></div>
+                </div>
+            </div>
+
+            <!-- 代理设置 -->
+            <div class="mb-4">
+                <h4><i class="bi bi-gear"></i> 代理设置</h4>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="autoSelectBest" name="auto_select_best" {% if auto_select_best %}checked{% endif %} value="true">
+                    <label class="form-check-label" for="autoSelectBest"><strong>自动选择最佳节点（根据延迟）</strong></label>
+                    <div class="form-text">启用后，系统会自动选择延迟最低的可用代理节点，并定期测试所有节点代理的延迟</div>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="proxyEnabled" name="proxy_enabled" {% if proxy_enabled %}checked{% endif %} value="true">
+                    <label class="form-check-label" for="proxyEnabled"><strong>启用常规代理（备用）</strong></label>
+                    <div class="form-text">当 VLESS/VMess/Trojan 代理不可用时，使用外部代理节点</div>
+                </div>
+            </div>
+
+            <!-- 常规代理设置 -->
+            <div class="mb-4">
+                <h4><i class="bi bi-link-45deg"></i> 常规代理设置</h4>
+                <div class="mb-3">
+                    <label for="httpProxy" class="form-label">HTTP代理地址</label>
+                    <input type="text" class="form-control" id="httpProxy" name="http_proxy" value="{{ http_proxy or '' }}" placeholder="例如: http://username:password@proxy.example.com:8080">
+                </div>
+                <div class="mb-3">
+                    <label for="httpsProxy" class="form-label">HTTPS代理地址</label>
+                    <input type="text" class="form-control" id="httpsProxy" name="https_proxy" value="{{ https_proxy or '' }}" placeholder="例如: https://username:password@proxy.example.com:8080">
+                </div>
+                <div class="mb-3">
+                    <label for="socksProxy" class="form-label">SOCKS代理地址</label>
+                    <input type="text" class="form-control" id="socksProxy" name="socks_proxy" value="{{ socks_proxy or '' }}" placeholder="例如: socks5://username:password@proxy.example.com:1080">
+                </div>
+            </div>
+
+            <!-- 其他设置 -->
+            <div class="mb-4">
+                <h4><i class="bi bi-sliders"></i> 其他设置</h4>
+                <div class="mb-3">
+                    <label for="reverseProxyAddress" class="form-label">反向代理地址</label>
+                    <input type="text" class="form-control" id="reverseProxyAddress" name="reverse_proxy_address" value="{{ reverse_proxy_address or '' }}" placeholder="例如: https://your-domain.com">
+                </div>
+                <div class="mb-3">
+                    <label for="latencyTestInterval" class="form-label">节点代理延迟测试间隔(分钟)</label>
+                    <input type="number" class="form-control" id="latencyTestInterval" name="latency_test_interval" value="{{ latency_test_interval }}" min="0" step="1">
+                    <div class="form-text">设置自动测试节点代理延迟的间隔时间(分钟)，仅在自动选择最佳节点代理启用时生效。设为0可禁用定期测试。</div>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="tsProxyEnabled" name="ts_proxy_enabled" {% if ts_proxy_enabled %}checked{% endif %} value="true">
+                    <label class="form-check-label" for="tsProxyEnabled"><strong>完整流媒体代理</strong></label>
+                    <div class="form-text">启用后，所有流媒体数据都会通过服务器转发，播放端无需特定网络即可观看。</div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="/config/mappings" class="btn btn-secondary me-md-2"><i class="bi bi-arrow-left"></i> 返回</a>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> 保存设置</button>
+            </div>
+        </form>
+
+        <!-- Xray 版本管理 -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-arrow-repeat"></i> Xray 版本管理</h5>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <label for="xrayVersion" class="form-label">Xray 版本号</label>
+                        <input type="text" class="form-control" id="xrayVersion" placeholder="例如: v26.5.9" value="v26.5.9">
+                    </div>
+                    <div class="col-md-3 align-self-end">
+                        <button type="button" class="btn btn-warning" id="updateXrayBtn"><i class="bi bi-cloud-download"></i> 更新 Xray</button>
+                    </div>
+                </div>
+                <div class="form-text mt-2">更新 Xray 版本会先停止目前节点代理并清空 xray 资料夹，然后下载指定版本。下载完成后需要手动重新启动代理。</div>
+            </div>
+        </div>
+
+        <!-- 模态框：添加/编辑节点 -->
+        <div id="serverModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1050;">
+            <div class="modal-dialog" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="serverModalTitle">添加节点</h5>
+                        <button type="button" class="btn-close" onclick="hideServerModal()"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="serverType">
+                        <div class="mb-3">
+                            <label for="serverName" class="form-label">节点名称</label>
+                            <input type="text" class="form-control" id="serverName" placeholder="例如: 香港节点1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="serverUrl" class="form-label">节点URL</label>
+                            <textarea class="form-control" id="serverUrl" rows="3" placeholder="请输入完整的代理URL"></textarea>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="serverEnabled" checked>
+                            <label class="form-check-label" for="serverEnabled">启用此节点</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="hideServerModal()">取消</button>
+                        <button type="button" class="btn btn-primary" onclick="document.getElementById('serverModal').hasAttribute('data-edit-index') ? updateServer() : saveServer()">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 模态框：批量测试进度 -->
+        <div class="modal fade" id="batchTestModal" tabindex="-1" aria-labelledby="batchTestModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="batchTestModalLabel">批量测试进度</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="progress mb-3"><div id="batchTestProgressBar" class="progress-bar" role="progressbar" style="width: 0%">0%</div></div>
+                        <div id="batchTestStatus" class="text-center">准备就绪...</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 模态框：单个测试进度 -->
+        <div class="modal fade" id="singleTestModal" tabindex="-1" aria-labelledby="singleTestModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="singleTestModalLabel">测试进度</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="progress mb-3"><div id="singleTestProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%">0%</div></div>
+                        <div id="singleTestStatus" class="text-center">准备就绪...</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 模态框：Xray 更新进度 -->
+        <div class="modal fade" id="xrayUpdateModal" tabindex="-1" aria-labelledby="xrayUpdateModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="xrayUpdateModalLabel">更新 Xray 版本</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="progress mb-3"><div id="xrayUpdateProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%">0%</div></div>
+                        <div id="xrayUpdateStatus" class="text-center">准备就绪...</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 配置说明 -->
+        <div class="mt-5 p-3 bg-light rounded">
+            <h5><i class="bi bi-info-circle"></i> 配置说明</h5>
+            <ul class="mb-0">
+                <li><strong>多代理支持</strong>: 可以添加多个 VLESS/VMess/Trojan 节点，系统会根据延迟自动选择最佳节点代理</li>
+                <li><strong>自动选择</strong>: 启用后系统会定期测试所有节点代理的延迟，并自动切换到最快的可用节点代理</li>
+                <li><strong>延迟测试间隔</strong>: 设置自动测试代理延迟的间隔分钟数，仅在自动选择启用时生效</li>
+                <li><strong>动态端口</strong>: Xray 内部端口自动适配 Docker 映射端口 (目前: {{ xray_port }})</li>
+                <li><strong>Xray 版本管理</strong>: 可以手动更新 Xray 核心版本，更新后需要重新启动代理</li>
+                <li><strong>Xray 官网</strong>: https://github.com/XTLS/Xray-core/releases</li>
+                <li><strong>导出/导入节点配置</strong>: 支持将所有 VLESS/VMess/Trojan 节点配置导出为 JSON 档案，或从 JSON 档案导入恢复配置（导入将完全替换现有配置）。</li>
+                <li><strong>完整流媒体代理</strong>: 启用后，所有流媒体数据都会通过服务器转发，播放端无需特定网络即可观看。</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>线路与 API 设置</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📺</text></svg>" type="image/svg+xml">
+    <style>
+        body { background-color: #f0f2f5; padding: 2rem 1rem; font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Roboto, 'Segoe UI', sans-serif; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .main-card { border: none; border-radius: 1rem; box-shadow: 0 0.75rem 1.5rem rgba(0,0,0,0.08); overflow: hidden; background: white; }
+        .card-header-custom { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1.2rem 1.5rem; border-bottom: none; }
+        .card-header-custom h3 { margin: 0; font-weight: 600; font-size: 1.5rem; color: white; }
+        .card-header-custom p { margin: 0.25rem 0 0; opacity: 0.9; font-size: 0.9rem; color: rgba(255,255,255,0.9); }
+        .card-body-custom { padding: 1.8rem; }
+        .section-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1.25rem; border-left: 4px solid #667eea; padding-left: 0.75rem; color: #1e293b; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { font-weight: 500; margin-bottom: 0.5rem; display: block; }
+        .badge-env { background-color: #f59e0b; color: #000; font-size: 0.7rem; font-weight: 500; margin-left: 0.5rem; vertical-align: middle; }
+        .info-badge { background-color: #eef2ff; color: #4338ca; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 20px; }
+        .cache-stats-panel { background-color: #f8fafc; border-radius: 1rem; padding: 1.25rem; border: 1px solid #e2e8f0; margin-top: 1rem; }
+        .btn-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; font-weight: 500; padding: 0.6rem 1.5rem; transition: transform 0.2s, box-shadow 0.2s; }
+        .btn-gradient:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(102,126,234,0.3); color: white; }
+        .btn-outline-secondary-custom { border: 1px solid #cbd5e1; background: white; transition: all 0.2s; }
+        .btn-outline-secondary-custom:hover { background-color: #f1f5f9; border-color: #94a3b8; }
+        .alert-rounded { border-radius: 0.75rem; border-left: 4px solid; }
+        hr { margin: 1.5rem 0; background-color: #e2e8f0; }
+        .text-muted-custom { color: #475569; font-size: 0.85rem; }
+        .env-warning-banner { background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 0.75rem; padding: 0.75rem 1rem; margin-bottom: 1.5rem; }
+        .toggle-card { background-color: #f8fafc; border-radius: 1rem; padding: 1rem; margin-bottom: 1rem; border: 1px solid #e2e8f0; }
+        @media (max-width: 576px) { .card-body-custom { padding: 1.25rem; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="main-card">
+        <div class="card-header-custom">
+            <div class="d-flex flex-wrap align-items-center justify-content-between">
+                <div>
+                    <h3><i class="bi bi-broadcast"></i> 线路与 API 设置</h3>
+                    <p>精细控制 APP/TV 线路、API 切换策略 | 提升播放成功率</p>
+                </div>
+                <a href="/config/mappings" class="btn btn-light btn-sm mt-2 mt-sm-0">
+                    <i class="bi bi-arrow-left-short"></i> 返回
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body-custom">
+            {% if message %}
+            <div class="alert alert-info alert-dismissible fade show alert-rounded" role="alert">
+                <i class="bi bi-info-circle-fill me-1"></i> {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+
+            <!-- 环境变量锁定提示 -->
+            {% if app_stream_source_locked or tv_stream_source_locked or use_tv_api_locked or auto_switch_api_locked or compat_mode_locked %}
+            <div class="env-warning-banner d-flex align-items-start">
+                <i class="bi bi-exclamation-triangle-fill text-warning me-2 fs-5"></i>
+                <div class="flex-grow-1">
+                    <strong>部分选项已由环境变量锁定</strong><br>
+                    {% if app_stream_source_locked %}APP 端线路已被 <code>APP_STREAM_SOURCE</code> 锁定。<br>{% endif %}
+                    {% if tv_stream_source_locked %}TV 端线路已被 <code>TV_STREAM_SOURCE</code> 锁定。<br>{% endif %}
+                    {% if use_tv_api_locked %}使用 TV API 已被 <code>USE_TV_API_FOR_SPECIAL</code> 锁定。<br>{% endif %}
+                    {% if auto_switch_api_locked %}自动切换 API 已被 <code>AUTO_SWITCH_API</code> 锁定。<br>{% endif %}
+                    {% if compat_mode_locked %}自动提取最高解析度已被 <code>COMPAT_MODE</code> 锁定。<br>{% endif %}
+                    如需修改请调整环境变量并重启服务。
+                </div>
+            </div>
+            {% endif %}
+
+            <form id="videoConfigForm">
+                <!-- 线路选择 -->
+                <div class="section-title">
+                    <i class="bi bi-signpost-split me-2"></i> 线路选择
+                </div>
+                <p class="text-muted-custom mb-3">不同的线路可能影响播放流畅度及兼容性。</p>
+
+                <div class="form-group">
+                    <label><i class="bi bi-phone"></i> APP 端线路</label>
+                    <select class="form-select" id="appStreamSource" name="app_stream_source"
+                            {% if app_stream_source_locked %}disabled{% endif %}>
+                        <option value="0" {% if app_stream_source == 0 %}selected{% endif %}>线路0 · Hinet CDN</option>
+                        <option value="1" {% if app_stream_source == 1 %}selected{% endif %}>线路1 · 官方 CDN</option>
+                    </select>
+                    <div class="form-text small text-muted">
+                        用于普通频道及 APP API。线路0为 Hinet CDN，线路1为官方 CDN。
+                        {% if app_stream_source_locked %}<span class="badge-env badge">环境变量锁定</span>{% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="bi bi-tv"></i> TV 端线路</label>
+                    <select class="form-select" id="tvStreamSource" name="tv_stream_source"
+                            {% if tv_stream_source_locked %}disabled{% endif %}>
+                        <option value="0" {% if tv_stream_source == 0 %}selected{% endif %}>线路0 · Hinet CDN</option>
+                        <option value="1" {% if tv_stream_source == 1 %}selected{% endif %}>线路1 · 官方 CDN</option>
+                    </select>
+                    <div class="form-text small text-muted">
+                        仅对特定频道（启用 TV API 时）生效。
+                        {% if tv_stream_source_locked %}<span class="badge-env badge">环境变量锁定</span>{% endif %}
+                    </div>
+                </div>
+
+                <div class="section-title mt-4">
+                    <i class="bi bi-toggles2 me-2"></i> 进阶功能
+                </div>
+
+                <div class="toggle-card">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap">
+                        <div>
+                            <i class="bi bi-cloud-upload fs-5 me-2"></i>
+                            <strong>启用 TV API（仅对特定频道生效）</strong>
+                            <div class="small text-muted mt-1">开启后，特定频道列表内的频道将优先使用 TV 端 API 获取播放地址；关闭则全部使用 APP API。</div>
+                            {% if use_tv_api_locked %}
+                            <div class="small text-warning mt-1"><i class="bi bi-lock-fill"></i> 已由环境变量 USE_TV_API_FOR_SPECIAL 锁定</div>
+                            {% endif %}
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="useTvApiSwitch"
+                                   style="width: 2.5rem; height: 1.2rem;"
+                                   {% if use_tv_api %}checked{% endif %}
+                                   {% if use_tv_api_locked %}disabled{% endif %}>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toggle-card">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap">
+                        <div>
+                            <i class="bi bi-arrow-repeat fs-5 me-2"></i>
+                            <strong>自动切换 API 与线路</strong>
+                            <div class="small text-muted mt-1">开启后，若首选线路不可用，将自动尝试同一 API 的另一线路（若存在）；当“特定频道使用 TV API”开启时，还会在 APP 和 TV API 之间自动切换。关闭则仅尝试首选线路。</div>
+                            {% if auto_switch_api_locked %}
+                            <div class="small text-warning mt-1"><i class="bi bi-lock-fill"></i> 已由环境变量 AUTO_SWITCH_API 锁定</div>
+                            {% endif %}
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="autoSwitchApi"
+                                   style="width: 2.5rem; height: 1.2rem;"
+                                   {% if auto_switch_api %}checked{% endif %}
+                                   {% if auto_switch_api_locked %}disabled{% endif %}>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toggle-card">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap">
+                        <div>
+                            <i class="bi bi-play-circle fs-5 me-2"></i>
+                            <strong>自动提取最高解析度</strong>
+                            <div class="small text-muted mt-1">开启后，播放地址将直接使用最高画质，避免多码率跳转。</div>
+                            {% if compat_mode_locked %}
+                            <div class="small text-warning mt-1"><i class="bi bi-lock-fill"></i> 已由环境变量 COMPAT_MODE 锁定</div>
+                            {% endif %}
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="compatModeSwitch"
+                                   style="width: 2.5rem; height: 1.2rem;"
+                                   {% if compat_mode %}checked{% endif %}
+                                   {% if compat_mode_locked %}disabled{% endif %}>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-3 mt-4">
+                    <button type="submit" class="btn btn-gradient px-4" id="submitBtn">
+                        <i class="bi bi-save"></i> 保存设定 & 清除缓存
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary-custom" id="resetToCurrent">
+                        <i class="bi bi-arrow-repeat"></i> 重置目前配置
+                    </button>
+                </div>
+            </form>
+
+            <hr>
+
+            <!-- 缓存管理 -->
+            <div>
+                <div class="section-title">
+                    <i class="bi bi-database"></i> 播放地址缓存管理
+                </div>
+                <div class="cache-stats-panel">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                        <div>
+                            <i class="bi bi-hourglass-split me-1 fs-5"></i>
+                            <strong>目前缓存数量</strong>
+                            <span id="cache-count" class="ms-2 badge bg-secondary">加载中...</span>
+                        </div>
+                        <div class="mt-2 mt-sm-0">
+                            <button type="button" id="clear-cache-btn" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash3"></i> 立即清空缓存
+                            </button>
+                            <button type="button" id="refresh-cache-count" class="btn btn-sm btn-outline-info ms-2">
+                                <i class="bi bi-arrow-clockwise"></i> 刷新
+                            </button>
+                        </div>
+                    </div>
+                    <div class="small text-muted-custom">
+                        <i class="bi bi-info-circle-fill"></i> 切换线路或 API 设置后，系统会自动清除相关缓存，下次播放将重新获取地址。
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="mt-2 p-3 bg-light bg-opacity-50 rounded-3">
+                <h6 class="fw-semibold"><i class="bi bi-lightbulb text-warning"></i> 使用建议</h6>
+                <ul class="small text-muted-custom mb-0 ps-3">
+                    <li>遇到播放卡顿或无法加载时，可尝试切换线路并清空缓存。</li>
+                    <li>线路 0 (Hinet CDN) 在部分地区宽带环境下表现更优；线路 1 (官方) 整体兼容性最佳。</li>
+                    <li>切换线路后系统会自动清除该频道的播放缓存，确保新线路立即生效。</li>
+                    <li>「清空缓存」按钮会清除所有频道的播放地址缓存，不影响其他配置。</li>
+                    <li>「自动提取最高解析度」开启后，无论选择线路0还是1，都会尝试返回最高码率流。</li>
+                    <li>「使用 TV API」开关可改变部分频道获取播放地址的接口。</li>
+                    <li>「自动切换 API 与 线路」开启后，播放失败时会自动尝试其他线路和 API 组合，提高成功率。</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+<script>
+    (function() {
+        const appSelect = document.getElementById('appStreamSource');
+        const tvSelect = document.getElementById('tvStreamSource');
+        const useTvApiSwitch = document.getElementById('useTvApiSwitch');
+        const autoSwitchApi = document.getElementById('autoSwitchApi');
+        const compatModeSwitch = document.getElementById('compatModeSwitch');
+        const submitBtn = document.getElementById('submitBtn');
+        const resetBtn = document.getElementById('resetToCurrent');
+        const form = document.getElementById('videoConfigForm');
+        const cacheCountSpan = document.getElementById('cache-count');
+        const clearCacheBtn = document.getElementById('clear-cache-btn');
+        const refreshCacheBtn = document.getElementById('refresh-cache-count');
+
+        // 目前保存的值（由模板注入）
+        let currentAppSource = {{ app_stream_source|default(0) }};
+        let currentTvSource = {{ tv_stream_source|default(0) }};
+        let currentUseTvApi = {% if use_tv_api %}true{% else %}false{% endif %};
+        let currentAutoSwitchApi = {% if auto_switch_api %}true{% else %}false{% endif %};
+        let currentCompatMode = {% if compat_mode %}true{% else %}false{% endif %};
+
+        // 锁定标志
+        const appLocked = {% if app_stream_source_locked %}true{% else %}false{% endif %};
+        const tvLocked = {% if tv_stream_source_locked %}true{% else %}false{% endif %};
+        const useTvApiLocked = {% if use_tv_api_locked %}true{% else %}false{% endif %};
+        const autoSwitchApiLocked = {% if auto_switch_api_locked %}true{% else %}false{% endif %};
+        const compatModeLocked = {% if compat_mode_locked %}true{% else %}false{% endif %};
+
+        let isSaving = false;
+
+        function showTemporaryAlert(msg, type = 'info') {
+            let existingAlert = document.querySelector('.dynamic-temp-alert');
+            if (existingAlert) existingAlert.remove();
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-rounded dynamic-temp-alert`;
+            alertDiv.setAttribute('role', 'alert');
+            alertDiv.innerHTML = `<i class="bi bi-${type === 'warning' ? 'exclamation-triangle' : (type === 'success' ? 'check-circle' : 'info-circle')} me-1"></i> ${msg}
+                                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+            const formContainer = document.getElementById('videoConfigForm');
+            formContainer.parentNode.insertBefore(alertDiv, formContainer);
+            setTimeout(() => { if (alertDiv && alertDiv.remove) alertDiv.remove(); }, 5000);
+        }
+
+        async function updateCacheCount() {
+            try {
+                const response = await fetch('/config/cache-stats');
+                const data = await response.json();
+                if (data.success && data.cache_stats && typeof data.cache_stats.play_url_cache !== 'undefined') {
+                    cacheCountSpan.innerText = `${data.cache_stats.play_url_cache} 个播放地址`;
+                } else {
+                    cacheCountSpan.innerText = '获取失败';
+                }
+            } catch (err) {
+                console.warn('缓存统计API异常', err);
+                cacheCountSpan.innerText = '暂无法获取';
+            }
+        }
+
+        async function clearPlayCache() {
+            if (!confirm('确定要清空所有播放地址缓存吗？清空后下次播放将重新获取地址。')) return;
+            try {
+                const response = await fetch('/config/clear-play-cache', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showTemporaryAlert('缓存已清空，播放新地址将立即生效', 'success');
+                    updateCacheCount();
+                } else {
+                    showTemporaryAlert('清空缓存失败: ' + (data.message || '未知错误'), 'danger');
+                }
+            } catch (err) {
+                console.error(err);
+                showTemporaryAlert('网络错误，无法清空缓存', 'danger');
+            }
+        }
+
+        async function saveAllSettings() {
+            if (isSaving) {
+                showTemporaryAlert('正在保存中，请稍后...', 'info');
+                return;
+            }
+            isSaving = true;
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 保存中...';
+
+            const newAppSource = parseInt(appSelect.value);
+            const newTvSource = parseInt(tvSelect.value);
+            const newUseTvApi = useTvApiSwitch.checked;
+            const newAutoSwitchApi = autoSwitchApi.checked;
+            const newCompatMode = compatModeSwitch.checked;
+
+            const payload = {
+                app_stream_source: newAppSource,
+                tv_stream_source: newTvSource,
+                use_tv_api: newUseTvApi,
+                auto_switch_api: newAutoSwitchApi,
+                compat_mode: newCompatMode
+            };
+
+            try {
+                const response = await fetch('/config/update-video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                if (data.message) {
+                    currentAppSource = newAppSource;
+                    currentTvSource = newTvSource;
+                    currentUseTvApi = newUseTvApi;
+                    currentAutoSwitchApi = newAutoSwitchApi;
+                    currentCompatMode = newCompatMode;
+                    showTemporaryAlert(`✅ ${data.message}`, 'success');
+                    updateCacheCount();
+                } else if (data.error) {
+                    showTemporaryAlert(`❌ 保存失败: ${data.error}`, 'danger');
+                    // 回滚 UI
+                    appSelect.value = currentAppSource;
+                    tvSelect.value = currentTvSource;
+                    useTvApiSwitch.checked = currentUseTvApi;
+                    autoSwitchApi.checked = currentAutoSwitchApi;
+                    compatModeSwitch.checked = currentCompatMode;
+                } else {
+                    showTemporaryAlert('保存成功，但服务器未返回明确信息', 'info');
+                }
+            } catch (error) {
+                console.error('保存错误:', error);
+                showTemporaryAlert('网络错误，请稍后再试', 'danger');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                isSaving = false;
+            }
+        }
+
+        function resetToCurrent() {
+            if (!appLocked) appSelect.value = currentAppSource;
+            if (!tvLocked) tvSelect.value = currentTvSource;
+            if (!useTvApiLocked) useTvApiSwitch.checked = currentUseTvApi;
+            if (!autoSwitchApiLocked) autoSwitchApi.checked = currentAutoSwitchApi;
+            if (!compatModeLocked) compatModeSwitch.checked = currentCompatMode;
+            showTemporaryAlert('已重置为目前保存的配置', 'info');
+        }
+
+        function init() {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                saveAllSettings();
+            });
+            resetBtn.addEventListener('click', resetToCurrent);
+            clearCacheBtn.addEventListener('click', clearPlayCache);
+            refreshCacheBtn.addEventListener('click', updateCacheCount);
+            updateCacheCount();
+        }
+
+        init();
+    })();
+</script>
+</body>
+</html>

@@ -1,39 +1,39 @@
-# IPTV-4GTV Decompile Project
+# IPTV-4GTV 反編譯專案
 
-## Overview
-This project contains the reverse-engineered structure and configuration of the `instituteiptv/iptv-4gtv` Docker image for educational purposes.
+## 概述
+本專案為教育目的用，包含對 `instituteiptv/iptv-4gtv` Docker 映像的逆向工程分析與結構提取。
 
-## Contents
-- `decompile/` - Extracted Docker image layers and reconstructed filesystem
-- `decompile/rootfs/` - Complete file system extracted from the image
-- `decompile/analysis-report.md` - Analysis report of the image structure
-- `docker-compose.yml` - Docker Compose configuration for running the service
+## 內容
+- `decompile/` - 解出的 Docker 映像層與重建的檔案系統
+- `decompile/rootfs/` - 從映像中提取的完整檔案系統
+- `decompile/analysis-report.md` - 映像結構分析報告
+- `docker-compose.yml` - Docker Compose 部署配置
 
-## Key Findings
+## 關鍵發現
 
-### Application Structure
-- **Main binary**: `app.cpython-312-x86_64-linux-musl.so` - Cython-compiled Python module (8MB)
-- **Templates**: 14 HTML templates for admin interface
-- **Configuration**: `id_mapping.json` maps 4GTV channel IDs to internal stream IDs
-- **Playlists**: M3U playlist (322 channels) and TXT format playlist
+### 應用程式結構
+- **主程式**: `app.cpython-312-x86_64-linux-musl.so` - Cython 編譯的 Python 模組 (8MB)
+- **範本檔**: 14 個 HTML 範本供管理介面使用
+- **設定檔**: `id_mapping.json` 對應 4GTV 頻道 ID 與內部串流 ID
+- **播放清單**: M3U 播放清單 (322 個頻道) 與 TXT 格式清單
 
-### Technology Stack
-- Python 3.12.13 on Alpine Linux
-- FastAPI + Hypercorn ASGI server
-- Async HTTP with aiohttp
-- APScheduler for task scheduling
-- PySocks for proxy support
+### 技術堆疊
+- Alpine Linux 上的 Python 3.12.13
+- FastAPI + Hypercorn ASGI 伺服器
+- aiohttp 非同步 HTTP
+- APScheduler 任務排程
+- PySocks 代理支援
 
-### Endpoints (from binary analysis)
-- `/admin/init` - Admin initialization
-- `/login` - Authentication
-- `/playlist` - M3U playlist generation
-- `/proxy/*`, `/ts-proxy/*` - Streaming proxy endpoints
-- `/config/*` - Configuration pages
+### 端點 (從二進位分析提取)
+- `/admin/init` - 管理員初始化
+- `/login` - 認證登入
+- `/playlist` - M3U 播放清單生成
+- `/proxy/*`、`/ts-proxy/*` - 串流代理端點
+- `/config/*` - 設定頁面
 
-## Usage
+## 使用方法
 
-### Quick Deploy
+### 快速部署
 ```bash
 docker run -d \
   --name iptv-4gtv \
@@ -42,13 +42,13 @@ docker run -d \
   instituteiptv/iptv-4gtv:latest
 ```
 
-### Via Docker Compose
+### 使用 Docker Compose
 ```bash
 docker-compose up -d
 ```
 
-## Analysis Report
-See `decompile/analysis-report.md` for full details.
+## 分析報告
+詳細內容請參閱 `decompile/analysis-report.md`。
 
-## Disclaimer
-This is an educational reverse-engineering project. All content belongs to their respective owners.
+## 免責聲明
+本為教育研究用途的逆向工程專案，所有內容版權屬於原所有者。

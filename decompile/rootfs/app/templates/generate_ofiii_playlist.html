@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生成 ofiii点播 播放列表</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📺</text></svg>" type="image/svg+xml">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 2rem;
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Roboto, 'Segoe UI', sans-serif;
+        }
+        .card {
+            max-width: 1000px;
+            margin: 0 auto;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .alert {
+            margin-bottom: 1.5rem;
+        }
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+        }
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 0.3rem 0.6rem;
+        }
+        .config-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .stats-section {
+            background-color: #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .stat-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .stat-success { color: #198754; }
+        .stat-warning { color: #fd7e14; }
+        .stat-danger { color: #dc3545; }
+        .stat-secondary { color: #6c757d; }
+        .channel-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        /* 新增：进度条容器样式 */
+        .progress-container {
+            display: none;
+            margin: 1.5rem 0;
+        }
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        .current-channel {
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .progress-status {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+    </style>
+    <script>
+        // 进度状态变量
+        let progressInterval;
+        let startTime;
+        let estimatedChannels = 242;
+        
+        async function generatePlaylist() {
+            try {
+                const btn = document.getElementById('generateBtn');
+                const progressContainer = document.getElementById('progressContainer');
+                const statsSection = document.getElementById('statsSection');
+                
+                // 禁用按钮
+                btn.disabled = true;
+                btn.innerHTML = '<i class="bi bi-hourglass-split"></i> 生成中...';
+                
+                // 隐藏统计区域
+                statsSection.style.display = 'none';
+                
+                // 显示进度条
+                progressContainer.style.display = 'block';
+                
+                // 初始化进度
+                startTime = Date.now();
+                updateProgress(0, '正在准备生成...');
+                
+                // 开始轮询进度
+                startProgressPolling();
+                
+                const response = await fetch('/config/generate-ofiii-playlist', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const result = await response.json();
+                
+                // 停止进度轮询
+                stopProgressPolling();
+                
+                if (result.error) {
+                    showAlert('错误: ' + result.error, 'danger');
+                    updateProgress(100, '生成失败');
+                } else {
+                    showAlert(result.message, 'success');
+                    displayStats(result.stats, result.vod_count);
+                    statsSection.style.display = 'block';
+                    updateProgress(100, '生成完成');
+                }
+            } catch (error) {
+                stopProgressPolling();
+                showAlert('网络错误: ' + error, 'danger');
+                updateProgress(100, '生成失败');
+            } finally {
+                const btn = document.getElementById('generateBtn');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-play-circle"></i> 开始生成播放列表';
+                
+                // 3秒后隐藏进度条
+                setTimeout(() => {
+                    document.getElementById('progressContainer').style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        function startProgressPolling() {
+            // 每2秒获取一次进度
+            progressInterval = setInterval(async () => {
+                try {
+                    const response = await fetch('/config/generate-progress');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const progress = Math.min(Math.floor((data.processed / estimatedChannels) * 100), 99);
+                        const status = `已处理 ${data.processed}/${estimatedChannels} 个频道`;
+                        updateProgress(progress, status, data.current_channel);
+                    }
+                } catch (error) {
+                    console.log('获取进度失败:', error);
+                }
+            }, 2000);
+        }
+        
+        function stopProgressPolling() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+        }
+        
+        function updateProgress(percent, status, currentChannel = '') {
+            const progressBar = document.getElementById('progressBar');
+            const progressPercent = document.getElementById('progressPercent');
+            const progressStatus = document.getElementById('progressStatus');
+            const currentChannelEl = document.getElementById('currentChannel');
+            
+            progressBar.style.width = percent + '%';
+            progressBar.setAttribute('aria-valuenow', percent);
+            progressPercent.textContent = percent + '%';
+            progressStatus.textContent = status;
+            
+            if (currentChannel) {
+                currentChannelEl.textContent = '目前频道: ' + currentChannel;
+                currentChannelEl.style.display = 'block';
+            } else {
+                currentChannelEl.style.display = 'none';
+            }
+            
+            // 计算预计剩余时间
+            if (percent > 0 && percent < 100) {
+                const elapsed = (Date.now() - startTime) / 1000;
+                const estimatedTotal = (elapsed / percent) * 100;
+                const remaining = estimatedTotal - elapsed;
+                
+                if (remaining > 0) {
+                    const minutes = Math.floor(remaining / 60);
+                    const seconds = Math.floor(remaining % 60);
+                    document.getElementById('remainingTime').textContent = 
+                        `预计剩余: ${minutes}分${seconds}秒`;
+                }
+            }
+        }
+        
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('alertMessage');
+            alertDiv.innerHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i> 
+                    ${message.replace(/\n/g, '<br>')}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+        }
+        
+        function displayStats(stats, vodCount) {
+            // 更新统计数字
+            document.getElementById('successCount').textContent = stats.success_count || 0;
+            document.getElementById('error503Count').textContent = stats.error_503_count || 0;
+            document.getElementById('error404Count').textContent = stats.error_404_count || 0;
+            document.getElementById('failureCount').textContent = stats.failure_count || 0;
+            document.getElementById('vodCount').textContent = vodCount || 0;
+            
+            // 更新频道列表
+            updateChannelList('successChannels', stats.success_count || 0, '成功频道');
+            updateChannelList('error503Channels', stats.error_503_channels || [], '503错误频道');
+            updateChannelList('error404Channels', stats.error_404_channels || [], '404错误频道');
+            updateChannelList('failureChannels', stats.failure_channels || [], '失败频道');
+        }
+        
+        function updateChannelList(elementId, data, title) {
+            const element = document.getElementById(elementId);
+            if (Array.isArray(data)) {
+                if (data.length > 0) {
+                    element.innerHTML = `<strong>${title}:</strong><br>${data.join(', ')}`;
+                } else {
+                    element.innerHTML = `<strong>${title}:</strong><br>无`;
+                }
+            } else {
+                // 如果是数字（成功数量）
+                element.innerHTML = `<strong>${title}:</strong><br>${data} 个频道`;
+            }
+        }
+        
+        async function updateAutoUpdateConfig() {
+            try {
+                const enabled = document.getElementById('autoUpdateEnabled').checked;
+                const interval = document.getElementById('updateInterval').value;
+                
+                const response = await fetch('/config/update-auto-update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        enabled: enabled,
+                        interval_hours: parseInt(interval)
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    showAlert('错误: ' + result.error, 'danger');
+                } else {
+                    showAlert(result.message, 'success');
+                    // 刷新页面以更新状态
+                    location.reload();
+                }
+            } catch (error) {
+                showAlert('网络错误: ' + error, 'danger');
+            }
+        }
+        
+        function toggleAutoUpdateConfig() {
+            const configSection = document.getElementById('autoUpdateConfig');
+            const toggleBtn = document.getElementById('toggleConfigBtn');
+            
+            if (configSection.style.display === 'none') {
+                configSection.style.display = 'block';
+                toggleBtn.innerHTML = '<i class="bi bi-chevron-up"></i> 隐藏自动更新设置';
+            } else {
+                configSection.style.display = 'none';
+                toggleBtn.innerHTML = '<i class="bi bi-chevron-down"></i> 显示自动更新设置';
+            }
+        }
+        
+        function toggleStatsSection() {
+            const statsSection = document.getElementById('statsSection');
+            const toggleBtn = document.getElementById('toggleStatsBtn');
+            
+            if (statsSection.style.display === 'none') {
+                statsSection.style.display = 'block';
+                toggleBtn.innerHTML = '<i class="bi bi-chevron-up"></i> 隐藏详细统计';
+            } else {
+                statsSection.style.display = 'none';
+                toggleBtn.innerHTML = '<i class="bi bi-chevron-down"></i> 显示详细统计';
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-10 mx-auto">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="bi bi-sync"></i> 生成 ofiii点播 播放列表
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="alertMessage">
+                            {% if message %}
+                            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                <i class="bi bi-info-circle"></i> {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- 进度条容器 -->
+                        <div class="progress-container" id="progressContainer">
+                            <div class="progress-info">
+                                <div class="current-channel" id="currentChannel"></div>
+                                <div class="progress-status" id="remainingTime"></div>
+                            </div>
+                            <div class="progress" style="height: 25px;">
+                                <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" style="width: 0%;" 
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                    <span id="progressPercent">0%</span>
+                                </div>
+                            </div>
+                            <div class="mt-2 text-center" id="progressStatus">
+                                正在准备生成...
+                            </div>
+                        </div>
+                        
+                        <!-- 自动更新状态 -->
+                        <div class="alert alert-secondary">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">
+                                        <i class="bi bi-clock"></i> 自动更新状态
+                                    </h5>
+                                    <p class="mb-0">
+                                        {% if auto_update_enabled %}
+                                        <span class="badge bg-success status-badge">已启用</span>
+                                        更新间隔: {{ interval_hours }} 小时
+                                        {% if next_run %}
+                                        <br>下次执行: {{ next_run }}
+                                        {% endif %}
+                                        {% else %}
+                                        <span class="badge bg-secondary status-badge">未启用</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <button type="button" class="btn btn-outline-primary btn-sm" id="toggleConfigBtn" onclick="toggleAutoUpdateConfig()">
+                                    <i class="bi bi-chevron-down"></i> 显示自动更新设置
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 自动更新配置 -->
+                        <div class="config-section" id="autoUpdateConfig" style="display: none;">
+                            <h5><i class="bi bi-gear"></i> 自动更新设置</h5>
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="autoUpdateEnabled" {% if auto_update_enabled %}checked{% endif %}>
+                                    <label class="form-check-label" for="autoUpdateEnabled">
+                                        启用自动更新
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="updateInterval" class="form-label">更新间隔 (小时)</label>
+                                <select class="form-select" id="updateInterval">
+                                    <option value="6" {% if interval_hours == 6 %}selected{% endif %}>6 小时</option>
+                                    <option value="12" {% if interval_hours == 12 %}selected{% endif %}>12 小时</option>
+                                    <option value="24" {% if interval_hours == 24 %}selected{% endif %}>24 小时</option>
+                                    <option value="48" {% if interval_hours == 48 %}selected{% endif %}>48 小时</option>
+                                    <option value="168" {% if interval_hours == 168 %}selected{% endif %}>每周</option>
+                                </select>
+                            </div>
+                            <button type="button" onclick="updateAutoUpdateConfig()" class="btn btn-primary">
+                                <i class="bi bi-save"></i> 保存设置
+                            </button>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <h5><i class="bi bi-exclamation-triangle"></i> 注意事项</h5>
+                            <ul class="mb-0">
+                                <li>此功能会自动生成ofiii点播(含选集)列表</li>
+                                <li>会生成两个文件：ofiii.m3u.txt 和 ofiii.txt.txt</li>
+                                <li>生成过程可能需要一些时间，请耐心等待</li>
+                                <li>启用自动更新后，系统会定期自动更新播放列表</li>
+                                <li>每个频道请求失败时会自动重试3次</li>
+                                <li>代码404:频道不存在、代码503:获取频道信息失败</li>
+                            </ul>
+                        </div>
+                        
+                        <button type="button" id="generateBtn" onclick="generatePlaylist()" class="btn btn-primary btn-lg w-100 mb-3">
+                            <i class="bi bi-play-circle"></i> 开始生成播放列表
+                        </button>
+                        
+                        <!-- 统计信息区域 -->
+                        <div class="stats-section" id="statsSection" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0"><i class="bi bi-graph-up"></i> 生成统计</h5>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="toggleStatsBtn" onclick="toggleStatsSection()">
+                                    <i class="bi bi-chevron-up"></i> 隐藏详细统计
+                                </button>
+                            </div>
+                            
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-number stat-success" id="successCount">0</div>
+                                    <div>成功频道</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number stat-warning" id="error503Count">0</div>
+                                    <div>503错误</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number stat-warning" id="error404Count">0</div>
+                                    <div>404错误</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number stat-danger" id="failureCount">0</div>
+                                    <div>其他失败</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number stat-secondary" id="vodCount">0</div>
+                                    <div>点播节目</div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="channel-list mb-3" id="successChannels">
+                                        <strong>成功频道:</strong><br>无
+                                    </div>
+                                    <div class="channel-list mb-3" id="error503Channels">
+                                        <strong>503错误频道:</strong><br>无
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="channel-list mb-3" id="error404Channels">
+                                        <strong>404错误频道:</strong><br>无
+                                    </div>
+                                    <div class="channel-list mb-3" id="failureChannels">
+                                        <strong>失败频道:</strong><br>无
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <a href="/config/mappings" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> 返回
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

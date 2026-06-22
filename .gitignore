@@ -1,13 +1,11 @@
-# Data files
+# 忽略大檔案 (保留結構說明)
 *.tar
-*.tar.gz
 
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 .Python
-*.so
 
 # OS
 .DS_Store
@@ -19,7 +17,28 @@ Thumbs.db
 *.swp
 *.swo
 
-# Keep important files
+# 忽略完整 rootfs，僅允許 app 目錄
+decompile/rootfs/bin/
+decompile/rootfs/etc/
+decompile/rootfs/lib/
+decompile/rootfs/root/
+decompile/rootfs/sbin/
+decompile/rootfs/usr/
+decompile/rootfs/var/
+decompile/rootfs/dev/
+decompile/rootfs/proc/
+decompile/rootfs/run/
+decompile/rootfs/tmp/
+decompile/rootfs/mnt/
+decompile/rootfs/opt/
+decompile/rootfs/srv/
+decompile/rootfs/home/
+decompile/rootfs/media/
+
+# 允許的檔案
 !decompile/analysis-report.md
+!decompile/manifest.json
+!decompile/index.json
+!decompile/oci-layout
 !decompile/rootfs/
-!docker-compose.yml
+!decompile/rootfs/app/
