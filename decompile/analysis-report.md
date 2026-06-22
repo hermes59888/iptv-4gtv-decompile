@@ -99,3 +99,31 @@ CMD: ["sh", "-c", "export PORT=${PORT:-5050} && hypercorn app:app --bind 0.0.0.0
 
 ## 環境變數
 PROXY_HOST=0.0.0.0, XRAY_PORT=1080 (預設)
+
+## 重建版程式
+
+已創建可運行的重建版：
+- `app/main.py` - FastAPI 架構重建
+- 支援基本路由：/login, /config/proxy, /config/token, /status, /health, /ready
+- 代理與 Token 管理 API 端點框架已建置
+- HTML 範本完整保留 (14 個)
+
+## 使用方法
+
+```bash
+# 設置環境變數
+export ADMIN_USER=admin
+export ADMIN_PWD=your_password
+
+# 運行重建版
+cd /home/jr/iptv-4gtv && python3 app/main.py
+
+# 或使用 Hypercorn (與原始架構一致)
+hypercorn app.main:app --bind 0.0.0.0:5050
+```
+
+## 待完善項目
+
+- 4GTV API 金鑰解密邏輯 (`decrypt_key`, `pkcs7_unpad`)
+- Xray 代理具體實作 (Vmess/Vless/Trojan 解析)
+- 串流代理邏輯 (`proxy_ts_async.fetch_ts`)
