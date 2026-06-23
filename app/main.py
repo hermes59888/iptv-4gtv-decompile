@@ -161,6 +161,37 @@ async def get_m3u():
     except:
         return HTMLResponse("#EXTM3U\n")
 
+# ---------- 編輯播放清單 ----------
+@app.get("/config/edit-m3u")
+async def edit_m3u_page():
+    """編輯 M3U 頁面"""
+    return render_template("edit_m3u.html")
+
+@app.get("/config/edit-txt")
+async def edit_txt_page():
+    """編輯 TXT 頁面"""
+    return render_template("edit_txt.html")
+
+@app.get("/config/id-mapping")
+async def id_mapping_page():
+    """頻道 ID 對照頁面"""
+    return render_template("id_mapping.html")
+
+@app.get("/config/mappings")
+async def mappings_page():
+    """對照表頁面"""
+    return render_template("id_mapping.html")
+
+@app.get("/config/video")
+async def video_config_page():
+    """影片設定頁面"""
+    return render_template("video_config.html")
+
+@app.get("/config/status")
+async def config_status_page():
+    """配置狀態頁面"""
+    return render_template("system_status.html")
+
 @app.get("/get_txt")
 async def get_txt():
     """取得 TXT 播放清單"""
