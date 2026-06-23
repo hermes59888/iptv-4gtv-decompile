@@ -8,7 +8,6 @@ from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 import os
 import secrets
-import json
 
 app = FastAPI(title="IPTV-4GTV", version="1.0.0")
 
@@ -28,10 +27,6 @@ def render_template(filename: str) -> HTMLResponse:
 class AdminInitData(BaseModel):
     admin_user: str
     admin_pwd: str
-
-class LoginData(BaseModel):
-    username: str
-    password: str
 
 class UpdateTokenData(BaseModel):
     action: str
