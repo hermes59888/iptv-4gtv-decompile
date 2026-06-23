@@ -74,7 +74,7 @@ async def login(request: Request):
         admin_pwd = form.get("admin_pwd", "") or form.get("password", "")
     
     if admin_user == ADMIN_USER and admin_pwd == ADMIN_PWD:
-        return JSONResponse({"success": True, "redirect": "/config/proxy", "message": "登入成功"})
+        return JSONResponse({"success": True, "redirect": "/config/mappings", "message": "登入成功"})
     return JSONResponse({"success": False, "error": "帳號或密碼錯誤"})
 
 @app.get("/logout")
