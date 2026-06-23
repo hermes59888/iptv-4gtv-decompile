@@ -134,10 +134,25 @@ async def update_proxy_servers(data: UpdateProxyData):
     proxy_servers = data.servers
     return {"success": True, "message": "代理伺服器已更新"}
 
-@app.post("/config/test-{proxy_type}")
-async def test_proxy_latency(proxy_type: str, server: Dict = None):
-    """測試代理連線延遲 - 模擬結果"""
-    return {"success": True, "latency": 50}
+@app.post("/config/test-vless")
+async def test_vless_server() -> Dict:
+    """測試 VLESS 連線延遲 - 模擬結果"""
+    return {"success": True, "latency": 50, "error": None}
+
+@app.post("/config/test-vmess")
+async def test_vmess_server() -> Dict:
+    """測試 VMESS 連線延遲 - 模擬結果"""
+    return {"success": True, "latency": 50, "error": None}
+
+@app.post("/config/test-trojan")
+async def test_trojan_server() -> Dict:
+    """測試 TROJAN 連線延遻 - 模擬結果"""
+    return {"success": True, "latency": 50, "error": None}
+
+@app.get("/config/current-proxy-status")
+async def get_current_proxy_status() -> Dict:
+    """取得目前代理狀態"""
+    return {"proxy_enabled": False, "current_proxy": None}
 
 # ---------- 播放清單 ----------
 @app.get("/get_m3u")
