@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>初始化管理员账号</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📺</text></svg>" type="image/svg+xml">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Roboto, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .init-container {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            overflow: hidden;
+        }
+        .init-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+        .logo-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .logo-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        .form-title {
+            color: #2c3e50;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .form-subtitle {
+            color: #6c757d;
+            margin-bottom: 2rem;
+        }
+        .form-control {
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        .alert {
+            border-radius: 8px;
+            border: none;
+        }
+        .password-strength {
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+        }
+        .strength-weak { background: #dc3545; width: 33%; }
+        .strength-medium { background: #ffc107; width: 66%; }
+        .strength-strong { background: #198754; width: 100%; }
+        .footer-text {
+            text-align: center;
+            margin-top: 2rem;
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="init-container">
+        <div class="logo-section">
+            <div class="logo-icon">
+                <i class="bi bi-shield-lock"></i>
+            </div>
+            <h1 class="form-title">系统初始化</h1>
+            <p class="form-subtitle">请设置管理员账户和密码</p>
+        </div>
+        
+        <div id="messageContainer"></div>
+        
+        <form id="initForm">
+            <div class="mb-3">
+                <label for="username" class="form-label">用户名称</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="bi bi-person"></i>
+                    </span>
+                    <input type="text" class="form-control" id="username" name="username" 
+                           placeholder="请输入用户名称" required autofocus>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="password" class="form-label">密码</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="bi bi-lock"></i>
+                    </span>
+                    <input type="password" class="form-control" id="password" name="password" 
+                           placeholder="请输入密码" required oninput="checkPasswordStrength()">
+                </div>
+                <div class="password-strength">
+                    <div class="strength-bar" id="passwordStrength"></div>
+                </div>
+                <div class="form-text">
+                    密码长度至少8个字符，包含字母和数字
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label for="confirm_password" class="form-label">确认密码</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="bi bi-lock-fill"></i>
+                    </span>
+                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
+                           placeholder="请再次输入密码" required oninput="checkPasswordMatch()">
+                </div>
+                <div class="form-text" id="passwordMatchText"></div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100 mb-3" id="submitBtn">
+                <i class="bi bi-check-circle me-2"></i>设置管理员账号
+            </button>
+        </form>
+        
+        <div class="footer-text">
+            <p>© 2026 FourgTV 直播/点播 | 首次使用请设置管理员账户</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            const strengthBar = document.getElementById('passwordStrength');
+            
+            // 重置样式
+            strengthBar.className = 'strength-bar';
+            
+            if (password.length === 0) {
+                strengthBar.style.width = '0%';
+                return;
+            }
+            
+            let strength = 0;
+            
+            // 长度检查
+            if (password.length >= 8) strength += 1;
+            if (password.length >= 12) strength += 1;
+            
+            // 字符类型检查
+            if (/[a-z]/.test(password)) strength += 1;
+            if (/[A-Z]/.test(password)) strength += 1;
+            if (/[0-9]/.test(password)) strength += 1;
+            if (/[^a-zA-Z0-9]/.test(password)) strength += 1;
+            
+            // 设置强度显示
+            if (strength <= 2) {
+                strengthBar.classList.add('strength-weak');
+            } else if (strength <= 4) {
+                strengthBar.classList.add('strength-medium');
+            } else {
+                strengthBar.classList.add('strength-strong');
+            }
+        }
+        
+        function checkPasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const matchText = document.getElementById('passwordMatchText');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (confirmPassword.length === 0) {
+                matchText.innerHTML = '';
+                submitBtn.disabled = false;
+                return;
+            }
+            
+            if (password === confirmPassword) {
+                matchText.innerHTML = '<span style="color: #198754;"><i class="bi bi-check-circle-fill"></i> 密码匹配</span>';
+                submitBtn.disabled = false;
+            } else {
+                matchText.innerHTML = '<span style="color: #dc3545;"><i class="bi bi-exclamation-circle-fill"></i> 密码不匹配</span>';
+                submitBtn.disabled = true;
+            }
+        }
+
+        function showMessage(message, type = 'info') {
+            const messageContainer = document.getElementById('messageContainer');
+            const alertClass = type === 'error' ? 'alert-danger' : 'alert-success';
+            
+            messageContainer.innerHTML = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    <i class="bi bi-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}-fill me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+        }
+
+        // 处理表单提交
+        document.getElementById('initForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            
+            if (password !== confirmPassword) {
+                showMessage('密码不匹配', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/admin/init', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        confirm_password: confirmPassword
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    showMessage(result.error, 'error');
+                } else {
+                    showMessage(result.message, 'success');
+                    if (result.redirect) {
+                        setTimeout(() => {
+                            window.location.href = result.redirect;
+                        }, 1500);
+                    }
+                }
+            } catch (error) {
+                showMessage('网络错误，请重试', 'error');
+            }
+        });
+        
+        // 初始检查
+        document.addEventListener('DOMContentLoaded', function() {
+            checkPasswordStrength();
+            checkPasswordMatch();
+        });
+    </script>
+</body>
+</html>

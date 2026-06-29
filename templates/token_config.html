@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+	<meta charset="UTF-8">
+	<meta content="width=device-width, initial-scale=1.0" name="viewport">
+	<title>Token管理</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📺</text></svg>" type="image/svg+xml">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 2rem;
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Roboto, 'Segoe UI', sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .token-section {
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .token-section:last-child {
+            border-bottom: none;
+        }
+        .token-display {
+            background: #f8f9fa;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+            margin-bottom: 1rem;
+        }
+        .btn {
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .btn.warning {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+        .btn.warning:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+        .notice {
+            color: #6c757d;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        h1, h3 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+        }
+        .alert {
+            margin-top: 1rem;
+        }
+        ul {
+            padding-left: 0;
+        }
+        li {
+            list-style: none;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .token-item {
+            flex: 1;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+    </style>
+    <script>
+        async function handleTokenAction(action, customToken = '') {
+            const data = {
+                action: action
+            };
+            
+            if (action === 'add_custom') {
+                data.custom_token = customToken;
+            }
+            
+            try {
+                const response = await fetch('/config/update-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    alert('错误: ' + result.error);
+                } else {
+                    alert(result.message);
+                    location.reload();
+                }
+            } catch (error) {
+                alert('网络错误: ' + error);
+            }
+        }
+
+        function addCustomToken() {
+            const customToken = document.getElementById('customTokenInput').value;
+            if (!customToken || !/^[A-Za-z0-9]{64}$/.test(customToken)) {
+                alert('Token必须是64位字母数字组合');
+                return;
+            }
+            
+            handleTokenAction('add_custom', customToken);
+        }
+
+        function deleteToken(token) {
+            if (confirm('确定要删除此Token吗？此操作无法恢复。')) {
+                const data = {
+                    action: 'delete_single',
+                    token_to_delete: token
+                };
+                
+                fetch('/config/update-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.error) {
+                        alert('错误: ' + result.error);
+                    } else {
+                        alert(result.message);
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    alert('网络错误: ' + error);
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+	<div class="container">
+		<h1><i class="bi bi-key"></i> Token管理</h1>
+        
+        {% if message %}
+        <div class="alert alert-info">
+            {{ message }}
+        </div>
+        {% endif %}
+		
+		<!-- 目前Token -->
+		<div class="token-section">
+			<h3><i class="bi bi-key-fill"></i> 目前生效Token</h3>
+			<div class="token-display">
+				{{ current_token }}
+			</div>
+			<button class="btn btn-primary" onclick="handleTokenAction('generate')">
+                <i class="bi bi-arrow-clockwise"></i> 生成新Token
+            </button>
+		</div>
+		
+		<!-- 新增自定义Token -->
+		<div class="token-section">
+			<h3><i class="bi bi-plus-circle"></i> 新增自定义Token</h3>
+			<div class="mb-3">
+                <input id="customTokenInput" class="form-control" pattern="[A-Za-z0-9]{64}" 
+                       placeholder="输入64位字母数字组合" required type="text">
+                <div class="form-text">
+                    请输入64位字母数字组合的Token
+                </div>
+            </div>
+			<button class="btn btn-success" onclick="addCustomToken()">
+                <i class="bi bi-plus-lg"></i> 新增自定义Token
+            </button>
+		</div>
+		
+		<!-- 安全操作 -->
+		<div class="token-section">
+			<h3><i class="bi bi-shield-exclamation"></i> 安全操作</h3>
+			<button class="btn warning" onclick="handleTokenAction('rotate')">
+                <i class="bi bi-arrow-repeat"></i> 强制替换所有Token
+            </button>
+			<p class="notice">⚠️ 替换操作将使所有旧Token立即失效</p>
+		</div>
+		
+		<!-- 有效Token列表 -->
+		<div class="token-section">
+			<h3><i class="bi bi-list-check"></i> 有效Token列表</h3>
+            {% if valid_tokens %}
+            <ul>
+                {% for token in valid_tokens %}
+                <li>
+                    <div class="token-display token-item">{{ token }}</div>
+                    <button class="btn delete-btn" onclick="deleteToken('{{ token }}')" title="删除此Token">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted">暂无其他有效Token</p>
+            {% endif %}
+		</div>
+		
+		<!-- 返回链接 -->
+		<div style="margin-top: 20px;">
+			<button class="btn btn-secondary" onclick="location.href='/config/mappings'" type="button">
+                <i class="bi bi-arrow-left"></i> 返回
+            </button>
+		</div>
+	</div>
+</body>
+</html>

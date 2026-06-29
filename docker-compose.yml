@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  iptv-4gtv-rebuild:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: iptv-4gtv-rebuild
+    ports:
+      - "5051:5050"      # 避免衝突
+    environment:
+      - ADMIN_USER=admin
+      - ADMIN_PWD=password
+      - PORT=5050
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+  # 原始映像 (參考)
+  iptv-4gtv-original:
+    image: instituteiptv/iptv-4gtv:latest
+    container_name: iptv-4gtv
+    ports:
+      - "5050:5050"
+      - "1080:1080"
+    environment:
+      - ADMIN_USER=admin
+      - ADMIN_PWD=password
+    restart: unless-stopped

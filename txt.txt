@@ -1,0 +1,178 @@
+綜合其他,#genre#
+民視第一台,http://localhost:5050/4gtv-live403/index.m3u8
+民視第一台,http://localhost:5050/4gtv-4gtv003/index.m3u8
+民視台灣台,http://localhost:5050/4gtv-live401/index.m3u8
+民視台灣台,http://localhost:5050/4gtv-4gtv001/index.m3u8
+民視,http://localhost:5050/4gtv-live215/index.m3u8
+民視,http://localhost:5050/4gtv-4gtv002/index.m3u8
+大愛電視,http://localhost:5050/4gtv-live007/index.m3u8
+中視,http://localhost:5050/4gtv-4gtv040/index.m3u8
+華視,http://localhost:5050/4gtv-4gtv041/index.m3u8
+三立綜合台,http://localhost:5050/4gtv-live207/index.m3u8
+客家電視,http://localhost:5050/4gtv-4gtv043/index.m3u8
+靖天綜合,http://localhost:5050/4gtv-4gtv046/index.m3u8
+靖天日本,http://localhost:5050/4gtv-4gtv047/index.m3u8
+新唐人亞太台,http://localhost:5050/4gtv-live050/index.m3u8
+ARIRANG阿里郎頻道,http://localhost:5050/4gtv-4gtv079/index.m3u8
+原住民族電視台,http://localhost:5050/4gtv-4gtv080/index.m3u8
+東森購物四台,http://localhost:5050/4gtv-live049/index.m3u8
+東森購物一台,http://localhost:5050/4gtv-live047/index.m3u8
+東森購物一台,http://localhost:5050/of-4gtv-4gtv102/index.m3u8
+東森購物二台,http://localhost:5050/4gtv-live046/index.m3u8
+東森購物二台,http://localhost:5050/of-4gtv-4gtv103/index.m3u8
+靖天育樂,http://localhost:5050/4gtv-4gtv062/index.m3u8
+KLT-靖天國際台,http://localhost:5050/4gtv-4gtv063/index.m3u8
+NICE TV 靖天歡樂台,http://localhost:5050/4gtv-4gtv054/index.m3u8
+靖天資訊,http://localhost:5050/4gtv-4gtv065/index.m3u8
+韓國娛樂台,http://localhost:5050/4gtv-4gtv016/index.m3u8
+東森購物三台,http://localhost:5050/4gtv-live048/index.m3u8
+好消息,http://localhost:5050/litv-ftv16/index.m3u8
+好消息2台,http://localhost:5050/litv-ftv17/index.m3u8
+大愛二台,http://localhost:5050/4gtv-live106/index.m3u8
+人間衛視,http://localhost:5050/4gtv-live008/index.m3u8
+國會頻道1台,http://localhost:5050/4gtv-4gtv084/index.m3u8
+國會頻道2台,http://localhost:5050/4gtv-4gtv085/index.m3u8
+中視,http://localhost:5050/of-4gtv-4gtv040/index.m3u8
+華視,http://localhost:5050/of-4gtv-4gtv041/index.m3u8
+好消息,http://localhost:5050/of-litv-ftv16/index.m3u8
+好消息2台,http://localhost:5050/of-litv-ftv17/index.m3u8
+國會頻道1台,http://localhost:5050/of-4gtv-4gtv084/index.m3u8
+國會頻道2台,http://localhost:5050/of-4gtv-4gtv085/index.m3u8
+DayStar,http://localhost:5050/daystar/index.m3u8
+愛爾達寵物運動台,http://localhost:5050/4gtv-4gtv070/index.m3u8
+ROCK Entertainment,http://localhost:5050/4gtv-live080/index.m3u8
+ABC Australia 澳洲公廣頻道,http://localhost:5050/4gtv-live167/index.m3u8
+
+電影戲劇,#genre#
+公視戲劇,http://localhost:5050/4gtv-4gtv042/index.m3u8
+民視影劇,http://localhost:5050/litv-ftv09/index.m3u8
+HITS頻道,http://localhost:5050/4gtv-live620/index.m3u8
+靖天戲劇,http://localhost:5050/4gtv-4gtv058/index.m3u8
+靖洋戲劇,http://localhost:5050/4gtv-4gtv045/index.m3u8
+金光布袋戲,http://localhost:5050/4gtv-live144/index.m3u8
+ROCK Action,http://localhost:5050/4gtv-live138/index.m3u8
+采昌影劇,http://localhost:5050/4gtv-4gtv049/index.m3u8
+靖天映畫,http://localhost:5050/4gtv-4gtv055/index.m3u8
+靖天電影,http://localhost:5050/4gtv-4gtv061/index.m3u8
+影迷數位電影台,http://localhost:5050/4gtv-4gtv011/index.m3u8
+amc電影台,http://localhost:5050/4gtv-4gtv017/index.m3u8
+Cinema World,http://localhost:5050/4gtv-live069/index.m3u8
+MCE我的歐洲電影,http://localhost:5050/litv-ftv10/index.m3u8
+經典電影台,http://localhost:5050/4gtv-live021/index.m3u8
+中視經典台,http://localhost:5050/4gtv-4gtv080/index.m3u8
+台灣戲劇台,http://localhost:5050/litv-xinchuang22/index.m3u8
+龍華洋片台,http://localhost:5050/litv-xinchuang02/index.m3u8
+龍華電影台,http://localhost:5050/litv-xinchuang03/index.m3u8
+龍華日韓台,http://localhost:5050/litv-xinchuang11/index.m3u8
+龍華偶像台,http://localhost:5050/litv-xinchuang12/index.m3u8
+龍華戲劇台,http://localhost:5050/litv-xinchuang18/index.m3u8
+龍華經典台,http://localhost:5050/litv-xinchuang21/index.m3u8
+ROCK Xstream搖滾極限頻道,http://localhost:5050/4gtv-live124/index.m3u8
+
+音樂綜藝,#genre#
+八大綜藝,http://localhost:5050/4gtv-4gtv039/index.m3u8
+TVBS精采台,http://localhost:5050/4gtv-4gtv067/index.m3u8
+民視綜藝,http://localhost:5050/4gtv-4gtv004/index.m3u8
+豬哥亮歌廳秀,http://localhost:5050/4gtv-4gtv006/index.m3u8
+TVBS歡樂台,http://localhost:5050/4gtv-4gtv068/index.m3u8
+電影原聲台 CMusic,http://localhost:5050/4gtv-live031/index.m3u8
+TRACE Urban,http://localhost:5050/4gtv-4gtv082/index.m3u8
+Mezzo Live HD,http://localhost:5050/4gtv-4gtv083/index.m3u8
+CLASSICA古典樂,http://localhost:5050/4gtv-4gtv059/index.m3u8
+八大精彩,http://localhost:5050/4gtv-4gtv034/index.m3u8
+
+生活旅遊,#genre#
+Global Trekker,http://localhost:5050/4gtv-live112/index.m3u8
+Lifetime,http://localhost:5050/4gtv-live029/index.m3u8
+INULTRA,http://localhost:5050/4gtv-live096/index.m3u8
+民視旅遊,http://localhost:5050/litv-ftv07/index.m3u8
+滾動力 Rollor,http://localhost:5050/4gtv-live012/index.m3u8
+亞洲旅遊,http://localhost:5050/4gtv-4gtv076/index.m3u8
+FUN 4K探索娛樂,http://localhost:5050/4gtv-live011/index.m3u8
+幸福空間居家台,http://localhost:5050/4gtv-4gtv064/index.m3u8
+LOVE NATURE,http://localhost:5050/4gtv-live208/index.m3u8
+愛爾達生活旅遊台,http://localhost:5050/4gtv-live120/index.m3u8
+LUXE TV,http://localhost:5050/4gtv-live121/index.m3u8
+TV5MONDE Style,http://localhost:5050/4gtv-live122/index.m3u8
+MagellanTV頻道 (麥哲倫頻道) ,http://localhost:5050/4gtv-live123/index.m3u8
+亞洲旅遊,http://localhost:5050/of-4gtv-4gtv076/index.m3u8
+Smart知識台,http://localhost:5050/litv-xinchuang19/index.m3u8
+
+兒童卡通,#genre#
+LiveABC互動英語頻道,http://localhost:5050/4gtv-live030/index.m3u8
+達文西頻道,http://localhost:5050/4gtv-4gtv018/index.m3u8
+ELTV生活英語台,http://localhost:5050/litv-xinchuang20/index.m3u8
+Nick Jr. 兒童頻道,http://localhost:5050/4gtv-live032/index.m3u8
+尼克兒童頻道,http://localhost:5050/4gtv-live105/index.m3u8
+DreamWorks 夢工廠動畫,http://localhost:5050/4gtv-live017/index.m3u8
+靖天卡通,http://localhost:5050/4gtv-4gtv044/index.m3u8
+靖洋卡通Nice Bingo,http://localhost:5050/4gtv-4gtv057/index.m3u8
+MOMO親子,http://localhost:5050/4gtv-live107/index.m3u8
+經典卡通台,http://localhost:5050/4gtv-live022/index.m3u8
+精選動漫台,http://localhost:5050/4gtv-live024/index.m3u8
+ELTV生活英語台,http://localhost:5050/of-litv-xinchuang20/index.m3u8
+龍華卡通,http://localhost:5050/litv-xinchuang01/index.m3u8
+
+新聞財經,#genre#
+鏡電視新聞台,http://localhost:5050/4gtv-4gtv075/index.m3u8
+TVBS,http://localhost:5050/media-live073/index.m3u8
+TVBS,http://localhost:5050/4gtv-4gtv073/index.m3u8
+TVBS新聞,http://localhost:5050/media-live072/index.m3u8
+TVBS新聞,http://localhost:5050/4gtv-4gtv072/index.m3u8
+東森新聞,http://localhost:5050/4gtv-4gtv152/index.m3u8
+東森新聞,http://localhost:5050/4gtv-live114/index.m3u8
+華視新聞台,http://localhost:5050/4gtv-live452/index.m3u8
+華視新聞台,http://localhost:5050/4gtv-4gtv052/index.m3u8
+華視新聞台,http://localhost:5050/of-4gtv-4gtv052/index.m3u8
+NHK WORLD-JAPAN,http://localhost:5050/4gtv-live168/index.m3u8
+民視新聞,http://localhost:5050/4gtv-live413/index.m3u8
+民視新聞,http://localhost:5050/litv-ftv13/index.m3u8
+三立新聞iNEWS,http://localhost:5050/4gtv-live089/index.m3u8
+東森財經新聞,http://localhost:5050/4gtv-4gtv153/index.m3u8
+東森財經新聞,http://localhost:5050/4gtv-live019/index.m3u8
+中視新聞台,http://localhost:5050/4gtv-4gtv074/index.m3u8
+中天新聞台,http://localhost:5050/4gtv-live409/index.m3u8
+中天新聞台,http://localhost:5050/4gtv-4gtv009/index.m3u8
+BLOOMBERG TV,http://localhost:5050/4gtv-live059/index.m3u8
+寰宇新聞,http://localhost:5050/4gtv-live408/index.m3u8
+寰宇新聞,http://localhost:5050/litv-longturn14/index.m3u8
+寰宇新聞台灣台,http://localhost:5050/4gtv-4gtv156/index.m3u8
+SBN 全球財經台,http://localhost:5050/4gtv-live060/index.m3u8
+FRANCE24 英文台,http://localhost:5050/4gtv-live146/index.m3u8
+半島國際新聞台,http://localhost:5050/4gtv-live157/index.m3u8
+CNBC Asia 財經台,http://localhost:5050/4gtv-live130/index.m3u8
+DW德國之聲,http://localhost:5050/4gtv-live071/index.m3u8
+非凡新聞,http://localhost:5050/4gtv-4gtv010/index.m3u8
+非凡商業,http://localhost:5050/4gtv-4gtv048/index.m3u8
+中視新聞台,http://localhost:5050/4gtv-live474/index.m3u8
+中視新聞台,http://localhost:5050/4gtv-4gtv074/index.m3u8
+中天新聞台,http://localhost:5050/of-4gtv-4gtv009/index.m3u8
+寰宇新聞,http://localhost:5050/of-litv-longturn14/index.m3u8
+寰宇新聞台灣台,http://localhost:5050/of-4gtv-4gtv156/index.m3u8
+寰宇財經,http://localhost:5050/of-4gtv-4gtv158/index.m3u8
+第1商業台,http://localhost:5050/4gtv-4gtv104/index.m3u8
+三立新聞iNEWS,http://localhost:5050/iNEWS/index.m3u8
+倪珍播新聞,http://localhost:5050/nnews-zh/index.m3u8
+
+體育競技,#genre#
+博斯魅力台,http://localhost:5050/litv-xinchuang04/index.m3u8
+博斯高球台,http://localhost:5050/litv-xinchuang05/index.m3u8
+博斯高球二台,http://localhost:5050/litv-xinchuang06/index.m3u8
+博斯運動一台,http://localhost:5050/litv-xinchuang07/index.m3u8
+博斯運動二台,http://localhost:5050/litv-xinchuang08/index.m3u8
+博斯網球台,http://localhost:5050/litv-xinchuang09/index.m3u8
+博斯無限台,http://localhost:5050/litv-xinchuang10/index.m3u8
+博斯無限二台,http://localhost:5050/litv-xinchuang13/index.m3u8
+Getwin Sports運動台,http://localhost:5050/4gtv-4gtv035/index.m3u8
+TRACE Sport Stars,http://localhost:5050/4gtv-4gtv077/index.m3u8
+智林體育,http://localhost:5050/4gtv-4gtv101/index.m3u8
+時尚運動X,http://localhost:5050/4gtv-live411/index.m3u8
+時尚運動X,http://localhost:5050/4gtv-4gtv014/index.m3u8
+車迷 TV,http://localhost:5050/4gtv-live201/index.m3u8
+GINX Esports TV,http://localhost:5050/4gtv-4gtv053/index.m3u8
+
+紀實探索,#genre#
+History 歷史頻道,http://localhost:5050/4gtv-live026/index.m3u8
+CI 罪案偵查頻道,http://localhost:5050/4gtv-live027/index.m3u8
+視納華仁紀實頻道,http://localhost:5050/4gtv-4gtv013/index.m3u8
+影迷數位紀實台,http://localhost:5050/litv-ftv15/index.m3u8

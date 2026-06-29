@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>频道ID配置</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📺</text></svg>" type="image/svg+xml">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 2rem;
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Roboto, 'Segoe UI', sans-serif;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-section {
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        .btn-action {
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        h1, h2 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+        }
+        .alert {
+            margin-bottom: 1.5rem;
+        }
+    </style>
+    <script>
+        async function handleFormSubmit(event, action = 'add') {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const data = {
+                action: action,
+                key: formData.get('key'),
+                provider: formData.get('provider'),
+                asset_id: formData.get('asset_id')
+            };
+            
+            try {
+                const response = await fetch('/config/id-mapping', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    alert('错误: ' + result.error);
+                } else {
+                    alert(result.message);
+                    location.reload();
+                }
+            } catch (error) {
+                alert('网络错误: ' + error);
+            }
+        }
+
+        async function deleteMapping(key) {
+            if (!confirm('确定要删除此映射吗？')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/config/id-mapping', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'delete',
+                        key: key
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    alert('错误: ' + result.error);
+                } else {
+                    alert(result.message);
+                    location.reload();
+                }
+            } catch (error) {
+                alert('网络错误: ' + error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="bi bi-diagram-3"></i> 频道ID配置</h1>
+        
+        {% if message %}
+        <div class="alert alert-info">
+            {{ message }}
+        </div>
+        {% endif %}
+        
+        <div class="form-section">
+            <h2><i class="bi bi-plus-circle"></i> 新增/更新映射</h2>
+            <form onsubmit="handleFormSubmit(event)">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="key" class="form-label">频道ID</label>
+                        <input type="text" class="form-control" id="key" name="key" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="provider" class="form-label">来源</label>
+                        <select class="form-select" id="provider" name="provider">
+                            <option value="">请选择</option>
+                            <option value="fourgtv">fourgtv</option>
+                            <option value="ofiii">ofiii</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="asset_id" class="form-label">映射ID</label>
+                        <input type="text" class="form-control" id="asset_id" name="asset_id" required>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> 增加/更新
+                    </button>
+                    <button type="button" onclick="location.href='/config/mappings'" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> 返回
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="table-section">
+            <h2><i class="bi bi-list-ul"></i> 现有配置</h2>
+            <div class="table-container">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>频道ID</th>
+                            <th>来源</th>
+                            <th>映射ID</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for key, value in mapping.items() %}
+                        <tr>
+                            <td>{{ key }}</td>
+                            <td>{{ value[0] }}</td>
+                            <td>{{ value[1] }}</td>
+                            <td>
+                                <button type="button" onclick="deleteMapping('{{ key }}')" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash"></i> 删除
+                                </button>
+                             </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
